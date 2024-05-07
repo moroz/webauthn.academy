@@ -46,7 +46,24 @@ a {
   }
 }
 
+pre,
+code {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
+}
+
 :not(pre)>code {
   background: #eee;
   color: #2c3e50;
+  font-size: 0.875em;
+}
+
+:not(pre) a>code {
+  color: blue;
 }

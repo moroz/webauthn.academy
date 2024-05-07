@@ -37,5 +37,5 @@ Authentication happens when the user wants to prove their identity to the server
 ### Registration
 
 When a user wants to register their authentication device (passkey) in a Webauthn workflow, the back end server generates a random "challenge" (a long string of binary data that the authenticator signs using a private key).
-This challenge is sent to the browser over HTTP (and a copy of the challenge data is stored in a session storage, e. g. in an encrypted and signed cookie), after which the browser calls the asynchronous API [navigator.credentials.create](https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/create).
+This challenge is sent to the browser over HTTP (and a copy of the challenge data is stored in a session storage, e. g. in an encrypted and signed cookie), after which the browser calls the asynchronous API [`navigator.credentials.create`](https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/create).
 At this point, if the options passed to `navigator.credentials.create` are correct and the browser supports the Webauthn API, the browser should present a pop-up to the user, listing the possible options to register an authenticator device.
