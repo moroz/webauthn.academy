@@ -24,4 +24,6 @@ Even the documentation and demo projects for Webauthn in specfic programming lan
 - How to store the public keys and authenticator metadata in a database?
 - What are all those cryptic options in the JavaScript APIs (`navigator.credentials.create` and `navigator.credentials.get`)?
 - How do these options influence the security of my application?
+- Who the heck is Alice?
 
+Starting from May 7th, 2024, I intend to spend an hour each day working on this website, for at least a month.
