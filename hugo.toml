@@ -1,3 +1,15 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://webauthn.academy/'
 languageCode = 'en-us'
-title = 'My New Hugo Site'
+title = 'Webauthn Academy'
+theme = 'webauthn'
+disableKinds = ["taxonomy", "term"]
+
+[[menus.main]]
+name = 'Home'
+pageRef = '/'
+weight = 10
+
+[[menus.main]]
+name = 'Changelog'
+pageRef = '/changelog/'
+weight = 20
