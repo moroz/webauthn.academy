@@ -1,12 +1,7 @@
-{{- with resources.Get "js/main.js" }}
-  {{- if eq hugo.Environment "development" }}
-    {{- with . | js.Build }}
-      <script src="{{ .RelPermalink }}"></script>
-    {{- end }}
-  {{- else }}
-    {{- $opts := dict "minify" true }}
-    {{- with . | js.Build $opts | fingerprint }}
-      <script src="{{ .RelPermalink }}" integrity="{{- .Data.Integrity }}" crossorigin="anonymous"></script>
-    {{- end }}
+{{- if eq hugo.Environment "development" }}
+  <script type="module" src="http://localhost:5173/src/main.ts"></script>
+{{- else }}
+  {{- with resources.Get "main.js" | fingerprint }}
+    <script src="{{ .RelPermalink }}" integrity="{{- .Data.Integrity }}" crossorigin="anonymous" type="module"></script>
   {{- end }}
 {{- end }}
