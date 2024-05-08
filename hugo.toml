@@ -13,3 +13,6 @@ weight = 10
 name = 'Changelog'
 pageRef = '/changelog/'
 weight = 20
+
+[markup.goldmark.renderer]
+unsafe= true
