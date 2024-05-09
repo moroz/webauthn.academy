@@ -1,8 +1,7 @@
 ---
-title: Homepage
+title: What is Webauthn and why should I care?
+layout: single
 ---
-
-## What is Webauthn and why should I care?
 
 Webauthn (short for _Web Authentication API_) is a technology developed by the [W3C](https://www.w3.org/) and the [FIDO Alliance](https://fidoalliance.org/).
 It provides a way to securely sign in to websites using public key cryptography.

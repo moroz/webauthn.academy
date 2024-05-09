@@ -2,6 +2,12 @@
 title: Changelog
 ---
 
+## 2024-05-09
+
+* Stub sections for Elixir, Golang, and browser APIs.
+* Add descriptive links in the footer.
+* Add links to licenses.
+
 ## 2024-05-08
 
 * Integrated Vite+Svelte into the asset pipeline.

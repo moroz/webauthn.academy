@@ -2,4 +2,5 @@
 title: Implementing Webauthn in Golang
 ---
 
-Test
+This section is dedicated to a framework-agnostic implementation of a Webauthn workflow using the Golang programming language.
+

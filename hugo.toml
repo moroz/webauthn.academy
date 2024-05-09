@@ -4,6 +4,9 @@ title = 'Webauthn Academy'
 theme = 'webauthn'
 disableKinds = ["taxonomy", "term"]
 
+[markup.highlight]
+style = "borland"
+
 [[menus.main]]
 name = 'Home'
 pageRef = '/'
@@ -25,6 +28,11 @@ pageRef = '/golang/'
 weight = 40
 
 [[menus.main]]
+name = 'Contact'
+pageRef = '/contact/'
+weight = 50
+
+[[menus.footer]]
 name = 'Changelog'
 pageRef = '/changelog/'
 weight = 50
@@ -45,7 +53,7 @@ pageRef = '/golang/'
 weight = 30
 
 [[menus.footer]]
-name = 'Contact'
+name = 'Contact and licensing'
 pageRef = '/contact/'
 weight = 40
 
