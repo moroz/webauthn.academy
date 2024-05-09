@@ -14,47 +14,47 @@ weight = 10
 
 [[menus.main]]
 name = 'Browser'
-pageRef = '/browser-apis/'
+pageRef = '/browser-apis'
 weight = 20
 
 [[menus.main]]
 name = 'Elixir'
-pageRef = '/elixir/'
+pageRef = '/elixir'
 weight = 30
 
 [[menus.main]]
 name = 'Golang'
-pageRef = '/golang/'
+pageRef = '/golang'
 weight = 40
 
 [[menus.main]]
 name = 'Contact'
-pageRef = '/contact/'
+pageRef = '/contact'
 weight = 50
 
 [[menus.footer]]
 name = 'Changelog'
-pageRef = '/changelog/'
+pageRef = '/changelog'
 weight = 50
 
 [[menus.footer]]
 name = 'Webauthn Browser APIs'
-pageRef = '/browser-apis/'
+pageRef = '/browser-apis'
 weight = 10
 
 [[menus.footer]]
 name = 'Implementing Webauthn in Elixir'
-pageRef = '/elixir/'
+pageRef = '/elixir'
 weight = 20
 
 [[menus.footer]]
 name = 'Implementing Webauthn in Golang'
-pageRef = '/golang/'
+pageRef = '/golang'
 weight = 30
 
 [[menus.footer]]
 name = 'Contact and licensing'
-pageRef = '/contact/'
+pageRef = '/contact'
 weight = 40
 
 [markup.goldmark.renderer]
