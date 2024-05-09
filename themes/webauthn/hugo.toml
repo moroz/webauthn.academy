@@ -2,11 +2,6 @@ baseURL = 'https://webauthn.academy/'
 languageCode = 'en-us'
 title = 'Webauthn Academy'
 
-[[menus.main]]
-name = 'Home'
-pageRef = '/'
-weight = 10
-
 [module]
   [module.hugoVersion]
     extended = false
