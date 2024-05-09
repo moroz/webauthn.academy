@@ -17,6 +17,16 @@ body {
   color: #222;
   font-family: "Open Sans", sans-serif;
   line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  overflow-x: hidden;
+
+  >main {
+    flex: 1;
+  }
 }
 
 header {
@@ -28,10 +38,14 @@ footer {
   border-top: 1px solid #222;
   margin: 2.5rem auto;
   text-align: center;
-  padding-top: 2.5rem;
+  width: 100%;
 
   p {
     margin: 0;
+  }
+
+  nav {
+    text-align: left;
   }
 }
 
@@ -41,12 +55,12 @@ a {
 }
 
 .container {
-  max-width: 768px;
+  width: 768px;
   margin: 0 auto;
 
   @media screen and (max-width: 768px) {
-    max-width: 100%;
-    margin: 0 1.125rem;
+    width: 100%;
+    padding: 0 1.125rem;
   }
 }
 
@@ -90,4 +104,10 @@ figcaption {
   &::before {
     content: "Fig. " counter(figure) ": ";
   }
+}
+
+#section-title {
+  margin-top: 0;
+  font-size: 1.8em;
+  line-height: 1.5;
 }
