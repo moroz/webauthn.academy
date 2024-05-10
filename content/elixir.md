@@ -50,6 +50,9 @@ mix archive.install hex phx_new 1.7.12
 Create a new Phoenix application without Tailwind, LiveView, and LiveView dashboard.
 The application is called "academy," because we are developing it at the Webauthn Academy.
 
+I like to build my assets with [Vite](https://vitejs.dev/), and a few years ago, I even wrote how to [integrate Vite within a Phoenix application](https://moroz.dev/blog/integrating-vite-js-with-phoenix-1-6/).
+However, I will be using the default asset pipeline in this tutorial to avoid digressions.
+
 ```shell
 mix phx.new --no-tailwind --no-dashboard --no-live academy
 ```
