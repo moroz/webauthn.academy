@@ -5,7 +5,9 @@ theme = 'webauthn'
 disableKinds = ["taxonomy", "term"]
 
 [markup.highlight]
-style = "borland"
+linenos = true
+lineNumbersInTable = false
+noClasses = false
 
 [[menus.main]]
 name = 'Home'

@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 
+@import "./assets/chroma.css";
+
 $container-size: 768px;
 
 *,
@@ -99,6 +101,15 @@ code {
     Consolas,
     Liberation Mono,
     monospace;
+}
+
+pre code {
+  white-space: pre-wrap;
+}
+
+pre.chroma {
+  padding-top: .25em;
+  padding-bottom: .25em;
 }
 
 :not(pre)>code {
