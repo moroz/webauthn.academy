@@ -16,6 +16,11 @@ $ uname -a
 Linux lm 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 14 13:30:08 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 ```
 
+On Linux and Windows, Webauthn is currently supported by Firefox and Chromium (and Chromium-based browsers, such as Google Chrome and MS Edge).
+On macOS, Webauthn is also supported in Safari.
+
+I will be testing the application on both browsers on Linux, and less frequently on macOS Monterey (I refuse to use anything post-Monterey due to the unusable System Preferences app).
+
 ## Install Phoenix
 
 Install Elixir, Erlang, and Node using [mise](https://mise.jdx.dev/):

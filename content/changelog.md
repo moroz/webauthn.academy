@@ -2,6 +2,11 @@
 title: Changelog
 ---
 
+## 2024-05-10
+
+* Begin writing a tutorial for Elixir.
+* Fix long code snippets on narrow screens, generate CSS for `catppuccin-latte` color scheme.
+
 ## 2024-05-09
 
 * Stub sections for Elixir, Golang, and browser APIs.
