@@ -29,6 +29,7 @@ Install Elixir, Erlang, and Node using [mise](https://mise.jdx.dev/):
 mise local erlang@26.2.5
 mise local elixir@1.16.2-otp-26
 mise local node@22.1.0
+mise install
 ```
 
 This tutorial has been developed with Elixir 1.16.2, Erlang 26.2.5, and Node 22.1.0. If you are reading this in the future, you may need to tweak some parts of the walkthrough.
@@ -47,14 +48,11 @@ mix archive.install hex phx_new 1.7.12
 
 ## Create a project
 
-Create a new Phoenix application without Tailwind, LiveView, and LiveView dashboard.
+Create a new Phoenix application without Tailwind, ESBuild, LiveView, and LiveView dashboard.
 The application is called "academy," because we are developing it at the Webauthn Academy.
 
-I like to build my assets with [Vite](https://vitejs.dev/), and a few years ago, I even wrote how to [integrate Vite within a Phoenix application](https://moroz.dev/blog/integrating-vite-js-with-phoenix-1-6/).
-However, I will be using the default asset pipeline in this tutorial to avoid digressions.
-
 ```shell
-mix phx.new --no-tailwind --no-dashboard --no-live academy
+mix phx.new --no-assets --no-dashboard --no-live academy
 ```
 
 Initialize a Git repository for the newly created project. We rename the main branch to "main," because that name seems to be the least controversial at the moment.
@@ -65,4 +63,15 @@ git init
 git branch -M main
 git add .
 git commit -m "Initial commit"
+```
+
+I like to build my assets with [Vite](https://vitejs.dev/), and a few years ago, I even wrote how to [integrate Vite within a Phoenix application](https://moroz.dev/blog/integrating-vite-js-with-phoenix-1-6/).
+However, for this tutorial we don't need an asset bundler at all. We can use a pre-bundled CSS framework, and if we end up needing any handwritten CSS, we can use native CSS nesting---all browsers that support Webauthn support CSS nesting, anyway!
+
+## Generate authentication workflow
+
+Generate an authentication workflow using the `mix phx.gen.auth` generator provided by the Phoenix framework:
+
+```plain
+mix phx.gen.auth --no-live Accounts User users
 ```
