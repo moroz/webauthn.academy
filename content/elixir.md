@@ -5,6 +5,8 @@ title: Implementing Webauthn in Elixir
 This section is dedicated to implementing a Webauthn registration and authentication workflow using the Phoenix framework for the Elixir programming language.
 Since this is the programming language and Web framework I have worked the most over the course of my career, and since I have recently worked on such an implementation, this section may well be the most complete part of the website.
 
+This text is a work in progress. It is not yet a complete guide.
+
 ## Tutorial
 
 The following is a step-by-step tutorial for implementing a Webauthn registration and authentication workflow using Phoenix 1.7.12.
@@ -21,7 +23,7 @@ On macOS, Webauthn is also supported in Safari.
 
 I will be testing the application on both browsers on Linux, and less frequently on macOS Monterey (I refuse to use anything post-Monterey due to the unusable System Preferences app).
 
-## Install Phoenix
+### Install Phoenix
 
 Install Elixir, Erlang, and Node using [mise](https://mise.jdx.dev/):
 
@@ -46,7 +48,7 @@ Install the Phoenix app generator:
 mix archive.install hex phx_new 1.7.12
 ```
 
-## Create a project
+### Create a project
 
 Create a new Phoenix application without Tailwind, ESBuild, LiveView, and LiveView dashboard.
 The application is called "academy," because we are developing it at the Webauthn Academy.
@@ -66,12 +68,16 @@ git commit -m "Initial commit"
 ```
 
 I like to build my assets with [Vite](https://vitejs.dev/), and a few years ago, I even wrote how to [integrate Vite within a Phoenix application](https://moroz.dev/blog/integrating-vite-js-with-phoenix-1-6/).
-However, for this tutorial we don't need an asset bundler at all. We can use a pre-bundled CSS framework, and if we end up needing any handwritten CSS, we can use native CSS nesting---all browsers that support Webauthn support CSS nesting, anyway!
+However, for this tutorial we don't need an asset bundler at all. We can use the default set of Tailwind classes that came pre-bundled with the Phoenix starter application, and if we end up needing any handwritten CSS, we can use native CSS nesting---all browsers that support Webauthn support CSS nesting, anyway![^1]
 
-## Generate authentication workflow
+[^1]: Firefox, Chromium, and Safari all support native CSS nesting in their recent versions.
+
+### Generate authentication workflow
 
 Generate an authentication workflow using the `mix phx.gen.auth` generator provided by the Phoenix framework:
 
 ```plain
 mix phx.gen.auth --no-live Accounts User users
 ```
+
+## Generate a registration challenge
