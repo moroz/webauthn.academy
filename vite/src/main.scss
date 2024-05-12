@@ -26,7 +26,7 @@ body {
   width: 100%;
   overflow-x: hidden;
 
-  > main {
+  >main {
     flex: 1;
   }
 }
@@ -113,13 +113,13 @@ pre.chroma {
   padding-bottom: 0.25em;
 }
 
-:not(pre) > code {
+:not(pre)>code {
   background: #eee;
   color: #2c3e50;
   font-size: 0.875em;
 }
 
-:not(pre) a > code {
+:not(pre) a>code {
   color: blue;
 }
 
@@ -147,4 +147,22 @@ figcaption {
   margin-top: 0;
   font-size: 1.8em;
   line-height: 1.5;
+}
+
+.highlight {
+  position: relative;
+
+  &:not(:hover) {
+    .copy-to-clipboard {
+      opacity: 0;
+    }
+  }
+}
+
+.copy-to-clipboard {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  transition: opacity 0.2s ease-in-out;
+  cursor: pointer;
 }
