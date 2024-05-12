@@ -81,3 +81,5 @@ mix phx.gen.auth --no-live Accounts User users
 ```
 
 ## Generate a registration challenge
+
+
