@@ -1,4 +1,1 @@
-document.querySelectorAll("pre.chroma").forEach((block) => {
-  console.log(block);
-});
-
+document.querySelectorAll("pre.chroma").forEach(e=>{const t=document.createElement("button");t.setAttribute("type","button"),t.className="button copy-to-clipboard",t.textContent="Copy to clipboard",t.addEventListener("click",()=>{const n=[...e.querySelectorAll("span.cl")].map(o=>o.textContent).join("").trim();navigator.clipboard.writeText(n)}),e.parentElement?.appendChild(t)});
