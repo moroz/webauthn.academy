@@ -213,3 +213,29 @@ func (s *UserService) RegisterUser(params types.NewUserParams) (*types.User, err
 	return user, nil, nil
 }
 ```
+
+### Prepare a test suite
+
+Next, we can test our data validation and the registration logic using unit tests.
+Go comes with a built-in testing engine, but writing tests with just the standard library tooling is very tedious and repetitive.
+Therefore we are going to install [stretchr/testify](https://pkg.go.dev/github.com/stretchr/testify).
+
+Then, in `.envrc`, define two new environment variables: `TEST_DATABASE_NAME` and `TEST_DATABASE_URL`.
+We will be using these variables to create and connect to the test database.
+Then, define Makefile targets to prepare the test database and run the test suites:
+
+```makefile
+guard-%:
+	@ test -n "${$*}" || (echo "FATAL: Environment variable $* is not set!"; exit 1)
+
+db.test.prepare: guard-TEST_DATABASE_NAME guard-TEST_DATABASE_URL
+	@ createdb ${TEST_DATABASE_NAME} 2>/dev/null || true
+	@ env GOOSE_DBSTRING="${TEST_DATABASE_URL}" goose up
+
+test: db.test.prepare
+	go test -v ./...
+```
+
+This file utilizes GNU `make` syntax extensions to define a dynamic `guard-%` target, which ensures that each required environment variable is set and non-empty.
+We then use these guards to validate the environment before running the `db.test.prepare` target, which creates a test database and runs migrations against this database.
+Finally, the `test` target runs the test suites of all packages in the project. Since the `test` target lists `db.test.prepare` as a dependency, `make` will ensure that all the migrations are correctly applied against the test database before the test suites are executed.

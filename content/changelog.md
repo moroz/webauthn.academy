@@ -2,6 +2,11 @@
 title: Changelog
 ---
 
+## 2024-05-13
+
+* Add `UserStore` and `UserService` types with explanations.
+* Customize styling for "copy to clipboard" buttons.
+
 ## 2024-05-12
 
 * Work in progress on Golang/Elixir tutorials.
