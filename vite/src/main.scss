@@ -157,6 +157,13 @@ figcaption {
       opacity: 0;
     }
   }
+
+  &:has(.line:only-child) {
+    .copy-to-clipboard {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
 }
 
 .copy-to-clipboard {
@@ -164,7 +171,22 @@ figcaption {
   top: 0.5rem;
   right: 0.5rem;
   transition: opacity 0.2s ease-in-out;
+  font-size: 1rem;
   cursor: pointer;
+  font-family: inherit;
+
+  border: 0;
+  background: darken(rgb(239, 241, 245), 6%);
+  padding: 0.25em 0.5em;
+  border-radius: 5px;
+
+  &:hover {
+    background: darken(rgb(239, 241, 245), 12%);
+  }
+
+  &:active {
+    background: darken(rgb(239, 241, 245), 20%);
+  }
 }
 
 code.language-go {

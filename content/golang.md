@@ -106,7 +106,7 @@ drop table users;
 -- +goose StatementEnd
 ```
 
-In `types/user.go`, define a struct representing a record in the `users` table:
+In `types/user.go`, define types representing records in the `users` table and new user registration params:
 
 ```go
 package types
@@ -121,7 +121,23 @@ type User struct {
 	InsertedAt   time.Time `db:"inserted_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 }
+
+type NewUserParams struct {
+	Email                string `schema:"email" validate:"required|email"`
+	DisplayName          string `schema:"displayName" validate:"required"`
+	Password             string `schema:"password" validate:"required|min_len:8|max_len:80"`
+	PasswordConfirmation string `schema:"passwordConfirmation" validate:"required|eq_field:Password"`
+}
 ```
+
+On the `User` type, we define `db:` annotations, so that `sqlx` can map database columns to struct fields (these are not required if the struct field names match database columns).
+On the `NewUserParams` struct type, we define annotations for [gorilla/schema](https://github.com/gorilla/schema) and [gookit/validate](https://github.com/gookit/validate). Later on, we will be using `gorilla/schema` to convert HTTP POST data to structs. `gookit/validate` is a simple validation library.
+
+For reasons I cannot fathom, the Golang ecosystem has settled on the [go-playground/validator](https://pkg.go.dev/github.com/go-playground/validator) library as the state of the art in terms of struct validation.
+I have found this library to be good for validation, but a pain in the neck whenever I had to customize error messages.
+`gookit/validate` is much simpler, and customizing error messages is much simpler as well.
+
+In `store/user_store.go`, define a `userStore` struct. We will be using this type to implement basic CRUD (**C**reate-**R**ead-**U**pdate-**D**elete) operations. For now, let's write an `InsertUser` method to insert pre-validated records into the database. Later on, we will be building on top of this method to implement a user registration workflow.
 
 ```go
 package store
@@ -131,22 +147,69 @@ import (
 	"github.com/moroz/webauthn-academy-go/types"
 )
 
-type userStore struct {
+type UserStore struct {
 	db *sqlx.DB
 }
 
-func UserStore(db *sqlx.DB) userStore {
-	return userStore{db}
+func NewUserStore(db *sqlx.DB) UserStore {
+	return UserStore{db}
 }
 
 const insertUserQuery = `insert into users (email, display_name, password_hash) values ($1, $2, $3) returning *`
 
-func (s *userStore) InsertUser(user *types.User) (*types.User, error) {
+func (s *UserStore) InsertUser(user *types.User) (*types.User, error) {
 	var result types.User
 	err := s.db.Get(&result, insertUserQuery, user.Email, user.DisplayName, user.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
 	return &result, nil
+}
+```
+
+In `service/user_service.go`, define a `UserService` type. We will be using this type to implement higher-level database interactions.
+While the `InsertUser` function in the previous example was a simple `INSERT` operation, the `RegisterUser` method on the `UserService` struct also handles data validation using `gookit/validate` and password hashing using [alexedwards/argon2id](https://github.com/alexedwards/argon2id).
+
+```go
+package service
+
+import (
+	"github.com/alexedwards/argon2id"
+	"github.com/gookit/validate"
+	"github.com/jmoiron/sqlx"
+	"github.com/moroz/webauthn-academy-go/store"
+	"github.com/moroz/webauthn-academy-go/types"
+)
+
+type UserService struct {
+	store store.UserStore
+}
+
+func NewUserService(db *sqlx.DB) UserService {
+	return UserService{store.NewUserStore(db)}
+}
+
+func (s *UserService) RegisterUser(params types.NewUserParams) (*types.User, error, validate.Errors) {
+	v := validate.Struct(params)
+
+	if !v.Validate() {
+		return nil, nil, v.Errors
+	}
+
+	passwordHash, err := argon2id.CreateHash(params.Password, argon2id.DefaultParams)
+	if err != nil {
+		return nil, err, nil
+	}
+
+	user, err := s.store.InsertUser(&types.User{
+		Email:        params.Email,
+		PasswordHash: passwordHash,
+		DisplayName:  params.DisplayName,
+	})
+
+	if err != nil {
+		return nil, err, nil
+	}
+	return user, nil, nil
 }
 ```

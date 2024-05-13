@@ -2,6 +2,10 @@
 title: Changelog
 ---
 
+## 2024-05-12
+
+* Work in progress on Golang/Elixir tutorials.
+
 ## 2024-05-10
 
 * Begin writing a tutorial for Elixir.
