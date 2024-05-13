@@ -239,3 +239,33 @@ test: db.test.prepare
 This file utilizes GNU `make` syntax extensions to define a dynamic `guard-%` target, which ensures that each required environment variable is set and non-empty.
 We then use these guards to validate the environment before running the `db.test.prepare` target, which creates a test database and runs migrations against this database.
 Finally, the `test` target runs the test suites of all packages in the project. Since the `test` target lists `db.test.prepare` as a dependency, `make` will ensure that all the migrations are correctly applied against the test database before the test suites are executed.
+
+In `service/service_test.go`, define a test suite using `stretchr/testify`. This file does not define any specific tests, only a framework.
+
+```go
+package service_test
+
+import (
+	"os"
+	"testing"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+	"github.com/stretchr/testify/suite"
+)
+
+type ServiceTestSuite struct {
+	suite.Suite
+	db *sqlx.DB
+}
+
+func (s *ServiceTestSuite) SetupTest() {
+	conn := os.Getenv("TEST_DATABASE_URL")
+	s.db = sqlx.MustConnect("postgres", conn)
+	s.db.MustExec("truncate users cascade")
+}
+
+func TestServiceTestSuite(t *testing.T) {
+	suite.Run(t, new(ServiceTestSuite))
+}
+```
