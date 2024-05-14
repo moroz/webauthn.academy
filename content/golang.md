@@ -120,7 +120,11 @@ In `types/user.go`, define types representing records in the `users` table and n
 ```go
 package types
 
-import "time"
+import (
+	"time"
+
+	"github.com/gookit/validate"
+)
 
 type User struct {
 	ID           int       `db:"id"`
@@ -136,6 +140,15 @@ type NewUserParams struct {
 	DisplayName          string `schema:"displayName" validate:"required"`
 	Password             string `schema:"password" validate:"required|min_len:8|max_len:80"`
 	PasswordConfirmation string `schema:"passwordConfirmation" validate:"required|eq_field:Password"`
+}
+
+func (p NewUserParams) Messages() map[string]string {
+	return validate.MS{
+		"email":    "is not a valid email address",
+		"min_len":  "must be between 8 and 80 characters long",
+		"max_len":  "must be between 8 and 80 characters long",
+		"eq_field": "passwords do not match",
+	}
 }
 ```
 
