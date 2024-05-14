@@ -5,6 +5,15 @@ title: Implementing Webauthn in Golang
 This section is dedicated to a framework-agnostic implementation of a Webauthn workflow using the Go programming language.
 Whenever possible, I try to use just the standard library, so with enough knowledge of the Go ecosystem, you should be able to modify the solution to use your preferred libraries.
 
+## Who this text is for
+
+This website is not meant as a complete learning resource for beginners, but rather a more or less comprehensive overview of Webauthn that I wished were available when I was learning about this technology.
+
+This text assumes that you are an experienced Web developer, with reasonably good knowledge of back end development, the UNIX command line, SQL, and all three languages used in browser environments (HTML, CSS, and JavaScript).
+Therefore I won't be stopping to explain code snippets that I believe should be readable without explanation.
+
+If you have any suggestions for improvements to the tutorial, feel free to [reach out to me](https://github.com/moroz) or to submit a Pull Request or an issue in the [Github repository](https://github.com/moroz/webauthn.academy) of this website.
+
 ## Initial setup
 
 The following walkthrough sets up a password authentication from scratch. Once this text is finalized, you will be able to skip to the section where I start implementing Webauthn. For now, you can just follow along.
@@ -177,9 +186,16 @@ import (
 	"github.com/alexedwards/argon2id"
 	"github.com/gookit/validate"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"github.com/moroz/webauthn-academy-go/store"
 	"github.com/moroz/webauthn-academy-go/types"
 )
+
+func init() {
+	validate.Config(func(opt *validate.GlobalOption) {
+		opt.StopOnError = false
+	})
+}
 
 type UserService struct {
 	store store.UserStore
@@ -207,10 +223,22 @@ func (s *UserService) RegisterUser(params types.NewUserParams) (*types.User, err
 		DisplayName:  params.DisplayName,
 	})
 
-	if err != nil {
-		return nil, err, nil
+	if err == nil {
+		return user, nil, nil
 	}
-	return user, nil, nil
+
+	// https://www.postgresql.org/docs/current/errcodes-appendix.html
+	// Error 23505 `unique_violation` means that a unique constraint has
+    // prevented us from inserting a duplicate value. Instead of returning
+    // a raw error, we return a handcrafted validation error that we can
+    // later display in a form.
+	if err, ok := err.(*pq.Error); ok && err.Code == "23505" && err.Constraint == "users_email_key" {
+		validationErrors := validate.Errors{}
+		validationErrors.Add("Email", "unique", "has already been taken")
+		return nil, nil, validationErrors
+	}
+
+	return nil, err, nil
 }
 ```
 
@@ -267,5 +295,81 @@ func (s *ServiceTestSuite) SetupTest() {
 
 func TestServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(ServiceTestSuite))
+}
+```
+
+With this file in place, we can set up more specific tests for registration logic. In `service/user_registration.go`, add tests for the user service:
+
+```go
+package service_test
+
+import (
+	"github.com/alexedwards/argon2id"
+	"github.com/moroz/webauthn-academy-go/service"
+	"github.com/moroz/webauthn-academy-go/store"
+	"github.com/moroz/webauthn-academy-go/types"
+)
+
+func (s *ServiceTestSuite) TestRegisterUser() {
+	params := types.NewUserParams{
+		Email:                "registration@example.com",
+		DisplayName:          "Example User",
+		Password:             "foobar123123",
+		PasswordConfirmation: "foobar123123",
+	}
+
+	srv := service.NewUserService(s.db)
+	user, err, _ := srv.RegisterUser(params)
+	s.NoError(err)
+	s.Equal(params.Email, user.Email)
+	s.Equal(params.DisplayName, user.DisplayName)
+
+	match, err := argon2id.ComparePasswordAndHash(params.Password, user.PasswordHash)
+	s.True(match)
+}
+
+func (s *ServiceTestSuite) TestRegisterUserWithInvalidParams() {
+	params := types.NewUserParams{
+		Email:                "invalid",
+		DisplayName:          "Example User",
+		Password:             "short",
+		PasswordConfirmation: "not matching",
+	}
+
+	srv := service.NewUserService(s.db)
+	user, err, validationErrors := srv.RegisterUser(params)
+	s.NoError(err)
+	s.Nil(user)
+	msg := validationErrors.FieldOne("Email")
+	s.Equal("is not a valid email address", msg)
+	msg = validationErrors.FieldOne("Password")
+	s.Equal("must be between 8 and 80 characters long", msg)
+	msg = validationErrors.FieldOne("PasswordConfirmation")
+	s.Contains(msg, "do not match")
+}
+
+func (s *ServiceTestSuite) TestRegisterUserWithDuplicateEmail() {
+	store := store.NewUserStore(s.db)
+	user, err := store.InsertUser(&types.User{
+		Email:        "duplicate@email.com",
+		PasswordHash: "test",
+		DisplayName:  "John Smith",
+	})
+
+	s.NoError(err)
+
+	srv := service.NewUserService(s.db)
+
+	params := types.NewUserParams{
+		Email:                user.Email,
+		DisplayName:          "Other User",
+		Password:             "foobar123123",
+		PasswordConfirmation: "foobar123123",
+	}
+	user, err, validationErrors := srv.RegisterUser(params)
+	s.Nil(user)
+	s.Nil(err)
+	msg := validationErrors.FieldOne("Email")
+	s.Equal("has already been taken", msg)
 }
 ```

@@ -2,6 +2,12 @@
 title: Changelog
 ---
 
+## 2024-05-14
+
+* Test validation errors in `UserService`.
+* Add custom validation for unique constraint validation.
+* Add disclaimer about skill issues.
+
 ## 2024-05-13
 
 * Add `UserStore` and `UserService` types with explanations.
