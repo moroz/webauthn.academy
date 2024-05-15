@@ -281,7 +281,7 @@ This file utilizes GNU `make` syntax extensions to define a dynamic `guard-%` ta
 We then use these guards to validate the environment before running the `db.test.prepare` target, which creates a test database and runs migrations against this database.
 Finally, the `test` target runs the test suites of all packages in the project. Since the `test` target lists `db.test.prepare` as a dependency, `make` will ensure that all the migrations are correctly applied against the test database before the test suites are executed.
 
-In `service/service_test.go`, define a test suite using `stretchr/testify`. This file does not define any specific tests, only a framework.
+In `service/service_test.go`, define a test suite using `stretchr/testify`. This file does not define any specific tests, only a scaffolding for the tests we are going to add in other files.
 
 ```go
 package service_test
@@ -384,5 +384,146 @@ func (s *ServiceTestSuite) TestRegisterUserWithDuplicateEmail() {
 	s.Nil(err)
 	msg := validationErrors.FieldOne("Email")
 	s.Equal("has already been taken", msg)
+}
+```
+
+If you run the tests now, they should all pass:
+
+```plain
+$ make test
+2024/05/16 00:01:45 goose: no migrations to run. current version: 20240511103916
+go test -v ./...
+?   	github.com/moroz/webauthn-academy-go	[no test files]
+?   	github.com/moroz/webauthn-academy-go/handler	[no test files]
+?   	github.com/moroz/webauthn-academy-go/store	[no test files]
+?   	github.com/moroz/webauthn-academy-go/types	[no test files]
+=== RUN   TestServiceTestSuite
+=== RUN   TestServiceTestSuite/TestRegisterUser
+=== RUN   TestServiceTestSuite/TestRegisterUserWithDuplicateEmail
+=== RUN   TestServiceTestSuite/TestRegisterUserWithInvalidParams
+--- PASS: TestServiceTestSuite (0.20s)
+    --- PASS: TestServiceTestSuite/TestRegisterUser (0.10s)
+    --- PASS: TestServiceTestSuite/TestRegisterUserWithDuplicateEmail (0.06s)
+    --- PASS: TestServiceTestSuite/TestRegisterUserWithInvalidParams (0.03s)
+PASS
+ok  	github.com/moroz/webauthn-academy-go/service	(cached)
+```
+
+### Setting up a router and views 
+
+```plain
+go get -u github.com/go-chi/chi/v5
+```
+
+`handler/templates/layout/root.html.tmpl`:
+
+```go-html-template
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ if (and . .Title) }}{{ .Title }} | {{ end }}Academy</title>
+  </head>
+  <body>
+    {{ template "content" . }}
+  </body>
+</html>
+```
+
+`handler/templates/users/new.html.tmpl`:
+
+```go-html-template
+{{ define "content" }}
+<h1>Register</h1>
+
+<form action="/users/register" method="POST">
+  <div class="field">
+    <label for="email">Email:</label>
+    <input
+      id="email"
+      type="email"
+      name="email"
+      value="{{ .Params.Email }}"
+      autocomplete="email"
+      autofocus
+    />
+  </div>
+
+  <div class="field">
+    <label for="displayName">Display name:</label>
+    <input
+      id="displayName"
+      type="text"
+      name="displayName"
+      value="{{ .Params.DisplayName }}"
+      autocomplete="name"
+    />
+  </div>
+
+  <div class="field">
+    <label for="password">Password:</label>
+    <input
+      id="password"
+      type="password"
+      name="password"
+      autocomplete="new-password"
+    />
+  </div>
+
+  <div class="field">
+    <label for="passwordConfirmation">Confirm password:</label>
+    <input
+      id="passwordConfirmation"
+      type="password"
+      name="passwordConfirmation"
+      autocomplete="new-password"
+    />
+  </div>
+
+  <div>
+    <button type="submit" class="button">Submit</button>
+  </div>
+
+  <p>Already have an account? <a href="/sign-in">Sign in</a></p>
+</form>
+{{ end }}
+```
+
+`main.go`:
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+	"github.com/moroz/webauthn-academy-go/handler"
+)
+
+func MustGetenv(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		msg := fmt.Sprintf("FATAL: Environment variable %s is not set", key)
+		log.Fatal(msg)
+	}
+	return value
+}
+
+func main() {
+	db := sqlx.MustConnect("postgres", MustGetenv("DATABASE_URL"))
+
+	r := chi.NewRouter()
+
+	users := handler.UserHandler(db)
+	r.Get("/", users.New)
+
+	log.Println("Listening on port 3000")
+	log.Fatal(http.ListenAndServe(":3000", r))
 }
 ```

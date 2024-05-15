@@ -2,6 +2,11 @@
 title: Changelog
 ---
 
+## 2024-05-15
+
+* Developing a registration/login workflow for the Go application.
+* Pasted WIP code samples.
+
 ## 2024-05-14
 
 * Test validation errors in `UserService`.
