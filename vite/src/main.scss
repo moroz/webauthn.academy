@@ -1,8 +1,27 @@
-// @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
-
-@import "./assets/chroma.css";
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+@import "./assets/light.css" (prefers-color-scheme: light);
+@import "./assets/dark.css" (prefers-color-scheme: dark);
 
 $container-size: 768px;
+
+:root {
+  color-scheme: light dark;
+  --base-fg: #222;
+  --base-bg: #fff;
+  --link-color: #00e;
+  --code-fg: #2c3e50;
+  --code-bg: #eee;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --base-bg: #181818;
+    --base-fg: rgba(255, 255, 255, 0.87);
+    --link-color: #42a5f5;
+    --code-fg: #{darken(#9aedfe, 12%)};
+    --code-bg: #{lighten(#131313, 8%)};
+  }
+}
 
 *,
 *::before,
@@ -16,7 +35,7 @@ body {
 }
 
 body {
-  color: #222;
+  color: var(--base-fg);
   font-family: "Open Sans", sans-serif;
   line-height: 1.5;
   min-height: 100vh;
@@ -25,14 +44,15 @@ body {
   align-items: stretch;
   width: 100%;
   overflow-x: hidden;
+  background: var(--base-bg);
 
-  >main {
+  > main {
     flex: 1;
   }
 }
 
 header {
-  border-bottom: 1px solid #222;
+  border-bottom: 1px solid var(--base-fg);
   margin-bottom: 1rem;
 
   h1 {
@@ -51,7 +71,7 @@ header {
 }
 
 footer {
-  border-top: 1px solid #222;
+  border-top: 1px solid var(--base-fg);
   margin: 2.5rem auto;
   text-align: center;
   width: 100%;
@@ -77,7 +97,7 @@ nav {
 }
 
 a {
-  color: #00e;
+  color: var(--link-color);
   text-decoration: none;
 }
 
@@ -111,15 +131,16 @@ pre code {
 pre.chroma {
   padding-top: 0.25em;
   padding-bottom: 0.25em;
+  border-radius: 0.25em;
 }
 
-:not(pre)>code {
-  background: #eee;
-  color: #2c3e50;
+:not(pre) > code {
+  background: var(--code-bg);
+  color: var(--code-fg);
   font-size: 0.875em;
 }
 
-:not(pre) a>code {
+:not(pre) a > code {
   color: blue;
 }
 
