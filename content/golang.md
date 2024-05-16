@@ -411,11 +411,35 @@ ok  	github.com/moroz/webauthn-academy-go/service	(cached)
 
 ### Setting up a router and views 
 
+Now that we have the database logic in place, we can try and build a sign up view using HTML and CSS.
+First, install [go-chi/chi](https://github.com/go-chi/chi)---a router for use with `net/http`:
+
 ```plain
 go get -u github.com/go-chi/chi/v5
 ```
 
-`handler/templates/layout/root.html.tmpl`:
+We will be using [Vite](https://vitejs.dev/) to compile and bundle CSS and JavaScript assets.
+First, install the [pnpm package manager](https://pnpm.io/) for node using `npm`:
+
+```plain
+npm i -g pnpm
+```
+
+Then, create a Vite project under `assets/`:
+
+```plain
+pnpm create vite@latest assets --template vanilla-ts
+cd assets
+pnpm install
+```
+
+Install [dart-sass](https://sass-lang.com/) to compile stylesheets:
+
+```plain
+pnpm add sass
+```
+
+Next, define the basic HTML layouts at `handler/templates/layout/root.html.tmpl`:
 
 ```go-html-template
 <!doctype html>
@@ -434,9 +458,9 @@ go get -u github.com/go-chi/chi/v5
 
 ```go-html-template
 {{ define "content" }}
-<h1>Register</h1>
-
 <form action="/users/register" method="POST">
+  <h1>Register</h1>
+
   <div class="field">
     <label for="email">Email:</label>
     <input

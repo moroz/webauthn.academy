@@ -2,6 +2,10 @@
 title: Changelog
 ---
 
+## 2024-05-16
+
+* Style registration/login views using SASS
+
 ## 2024-05-15
 
 * Developing a registration/login workflow for the Go application.
