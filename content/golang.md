@@ -447,6 +447,7 @@ Next, define the basic HTML layouts at `handler/templates/layout/root.html.tmpl`
   <head>
     <meta charset="UTF-8" />
     <title>{{ if (and . .Title) }}{{ .Title }} | {{ end }}Academy</title>
+    <script type="module" src="http://localhost:5173/src/main.ts"></script>
   </head>
   <body>
     {{ template "content" . }}
@@ -454,62 +455,106 @@ Next, define the basic HTML layouts at `handler/templates/layout/root.html.tmpl`
 </html>
 ```
 
-`handler/templates/users/new.html.tmpl`:
+When bundling assets using Vite, the workflow is different between in development and production.
+In development, it suffices to add a `<script>` tag to load the entrypoint script of our JavaScript bundle, and Vite's development server will handle loading CSS automatically.
+In production builds, the JavaScript files are compiled and minified into JavaScript and CSS bundles.
+As a part of the build process, Vite appends a hash of each file's contents to the name of each file in the bundle, so that each file can be cached indefinitely by browsers.
+Vite produces a "cache manifest" file, containing a mapping of original filenames to their hashed counterparts.
+Therefore, for production deployments, we will need to parse the cache manifest and serve JS and CSS based on its contents.
+However, we can handle this at a later stage of the project.
+
+In all views, we will be setting the `<title>` dynamically, based on the data objects passed to templates.
+I like to organize view assigns into struct types, and using `{{ .Title }}` means that every struct type passed into views has a field or method called `Title`.
+One way to organize shared fields is to use struct embedding. In `handler/helpers.go`, define a `RequestContext` type that we will make use of later:
+
+```go
+package handler
+
+type RequestContext struct {
+	Title string
+}
+```
+
+In `handler/templates/users/new.html.tmpl`, add the registration form template:
 
 ```go-html-template
 {{ define "content" }}
-<form action="/users/register" method="POST">
-  <h1>Register</h1>
+<div class="layout unauthenticated">
+  <form action="/users/register" method="POST" class="card">
+    <header>
+      <h1>Register</h1>
+    </header>
 
-  <div class="field">
-    <label for="email">Email:</label>
-    <input
-      id="email"
-      type="email"
-      name="email"
-      value="{{ .Params.Email }}"
-      autocomplete="email"
-      autofocus
-    />
-  </div>
+    {{ $err := .Errors.FieldOne "Email" }}
+    <div class="field {{ if $err }}has-error{{ end }}">
+      <label for="email">Email:</label>
+      <input
+        id="email"
+        type="email"
+        name="email"
+        value="{{ .Params.Email }}"
+        autocomplete="email"
+        autofocus
+      />
+      {{ if $err }}
+      <p class="error-explanation">{{ $err }}</p>
+      {{ end }}
+    </div>
 
-  <div class="field">
-    <label for="displayName">Display name:</label>
-    <input
-      id="displayName"
-      type="text"
-      name="displayName"
-      value="{{ .Params.DisplayName }}"
-      autocomplete="name"
-    />
-  </div>
+    {{ $err := .Errors.FieldOne "DisplayName" }}
+    <div class="field {{ if $err }}has-error{{ end }}">
+      <label for="displayName">Display name:</label>
+      <input
+        id="displayName"
+        type="text"
+        name="displayName"
+        value="{{ .Params.DisplayName }}"
+        autocomplete="name"
+      />
+      {{ if $err }}
+      <p class="error-explanation">{{ $err }}</p>
+      {{ end }}
+    </div>
 
-  <div class="field">
-    <label for="password">Password:</label>
-    <input
-      id="password"
-      type="password"
-      name="password"
-      autocomplete="new-password"
-    />
-  </div>
+    {{ $err := .Errors.FieldOne "Password" }}
+    <div class="field {{ if $err }}has-error{{ end }}">
+      <label for="password">Password:</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+        autocomplete="new-password"
+      />
+      {{ if $err }}
+      <p class="error-explanation">{{ $err }}</p>
+      {{ end }}
+    </div>
 
-  <div class="field">
-    <label for="passwordConfirmation">Confirm password:</label>
-    <input
-      id="passwordConfirmation"
-      type="password"
-      name="passwordConfirmation"
-      autocomplete="new-password"
-    />
-  </div>
+    {{ $err := .Errors.FieldOne "PasswordConfirmation" }}
+    <div class="field {{ if $err }}has-error{{ end }}">
+      <label for="passwordConfirmation">Confirm password:</label>
+      <input
+        id="passwordConfirmation"
+        type="password"
+        name="passwordConfirmation"
+        autocomplete="new-password"
+      />
+      {{ if $err }}
+      <p class="error-explanation">{{ $err }}</p>
+      {{ end }}
+    </div>
 
-  <div>
-    <button type="submit" class="button">Submit</button>
-  </div>
+    <div>
+      <button type="submit" class="button is-fullwidth is-primary">
+        Submit
+      </button>
+    </div>
 
-  <p>Already have an account? <a href="/sign-in">Sign in</a></p>
-</form>
+    <footer>
+      <p>Already have an account? <a href="/sign-in">Sign in</a></p>
+    </footer>
+  </form>
+</div>
 {{ end }}
 ```
 

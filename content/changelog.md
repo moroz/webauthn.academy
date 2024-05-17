@@ -2,6 +2,10 @@
 title: Changelog
 ---
 
+## 2024-05-17
+
+* Further work on registration view: added validation errors in form view.
+
 ## 2024-05-16
 
 * Style registration/login views using SASS
