@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
-@import "./assets/light.css" (prefers-color-scheme: light);
-@import "./assets/dark.css" (prefers-color-scheme: dark);
+@import "./assets/light.css"(prefers-color-scheme: light);
+@import "./assets/dark.css"(prefers-color-scheme: dark);
 
 $container-size: 768px;
 
@@ -46,7 +46,7 @@ body {
   overflow-x: hidden;
   background: var(--base-bg);
 
-  > main {
+  >main {
     flex: 1;
   }
 }
@@ -134,13 +134,13 @@ pre.chroma {
   border-radius: 0.25em;
 }
 
-:not(pre) > code {
+:not(pre)>code {
   background: var(--code-bg);
   color: var(--code-fg);
   font-size: 0.875em;
 }
 
-:not(pre) a > code {
+:not(pre) a>code {
   color: blue;
 }
 
@@ -212,4 +212,8 @@ figcaption {
 
 code.language-go {
   tab-size: 4;
+}
+
+[data-lang="templ"] code {
+  tab-size: 2;
 }

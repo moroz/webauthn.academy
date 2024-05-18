@@ -418,6 +418,14 @@ First, install [go-chi/chi](https://github.com/go-chi/chi)---a router for use wi
 go get -u github.com/go-chi/chi/v5
 ```
 
+We will be building templates using [templ](https://templ.guide/) instead of Go's built-in `html/template` package.
+This is because Templ makes it much easier to share common data between views (such as flash messages, authentication status, page title, etc.).
+Install the templ CLI:
+
+```plain
+go install github.com/a-h/templ/cmd/templ@latest
+```
+
 We will be using [Vite](https://vitejs.dev/) to compile and bundle CSS and JavaScript assets.
 First, install the [pnpm package manager](https://pnpm.io/) for node using `npm`:
 
@@ -439,20 +447,34 @@ Install [dart-sass](https://sass-lang.com/) to compile stylesheets:
 pnpm add sass
 ```
 
-Next, define the basic HTML layouts at `handler/templates/layout/root.html.tmpl`:
+Next, define the basic HTML layouts at `templates/layout/root.templ`:
 
-```go-html-template
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>{{ if (and . .Title) }}{{ .Title }} | {{ end }}Academy</title>
-    <script type="module" src="http://localhost:5173/src/main.ts"></script>
-  </head>
-  <body>
-    {{ template "content" . }}
-  </body>
-</html>
+```go{data-lang="templ"}
+package layout
+
+import "github.com/moroz/webauthn-academy-go/config"
+
+templ RootLayout(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<title>{ title } | Academy</title>
+			<script type="module" src="http://localhost:5173/src/main.ts"></script>
+		</head>
+		<body>
+			{ children... }
+		</body>
+	</html>
+}
+
+templ Unauthenticated(title string) {
+	@RootLayout(title) {
+		<div class="layout unauthenticated">
+			{ children... }
+		</div>
+	}
+}
 ```
 
 When bundling assets using Vite, the workflow is different between in development and production.
@@ -467,95 +489,82 @@ In all views, we will be setting the `<title>` dynamically, based on the data ob
 I like to organize view assigns into struct types, and using `{{ .Title }}` means that every struct type passed into views has a field or method called `Title`.
 One way to organize shared fields is to use struct embedding. In `handler/helpers.go`, define a `RequestContext` type that we will make use of later:
 
-```go
-package handler
-
-type RequestContext struct {
-	Title string
-}
-```
-
 In `handler/templates/users/new.html.tmpl`, add the registration form template:
 
-```go-html-template
-{{ define "content" }}
-<div class="layout unauthenticated">
-  <form action="/users/register" method="POST" class="card">
-    <header>
-      <h1>Register</h1>
-    </header>
+```go{data-lang="templ"}
+package users 
 
-    {{ $err := .Errors.FieldOne "Email" }}
-    <div class="field {{ if $err }}has-error{{ end }}">
-      <label for="email">Email:</label>
-      <input
-        id="email"
-        type="email"
-        name="email"
-        value="{{ .Params.Email }}"
-        autocomplete="email"
-        autofocus
-      />
-      {{ if $err }}
-      <p class="error-explanation">{{ $err }}</p>
-      {{ end }}
-    </div>
+import "github.com/gookit/validate"
+import "github.com/moroz/webauthn-academy-go/types"
+import "github.com/moroz/webauthn-academy-go/templates/layout"
 
-    {{ $err := .Errors.FieldOne "DisplayName" }}
-    <div class="field {{ if $err }}has-error{{ end }}">
-      <label for="displayName">Display name:</label>
-      <input
-        id="displayName"
-        type="text"
-        name="displayName"
-        value="{{ .Params.DisplayName }}"
-        autocomplete="name"
-      />
-      {{ if $err }}
-      <p class="error-explanation">{{ $err }}</p>
-      {{ end }}
-    </div>
+func fieldClass(error string) string {
+	if error != "" {
+		return "field has-error"
+	}
+	return "field"
+}
 
-    {{ $err := .Errors.FieldOne "Password" }}
-    <div class="field {{ if $err }}has-error{{ end }}">
-      <label for="password">Password:</label>
-      <input
-        id="password"
-        type="password"
-        name="password"
-        autocomplete="new-password"
-      />
-      {{ if $err }}
-      <p class="error-explanation">{{ $err }}</p>
-      {{ end }}
-    </div>
-
-    {{ $err := .Errors.FieldOne "PasswordConfirmation" }}
-    <div class="field {{ if $err }}has-error{{ end }}">
-      <label for="passwordConfirmation">Confirm password:</label>
-      <input
-        id="passwordConfirmation"
-        type="password"
-        name="passwordConfirmation"
-        autocomplete="new-password"
-      />
-      {{ if $err }}
-      <p class="error-explanation">{{ $err }}</p>
-      {{ end }}
-    </div>
-
-    <div>
-      <button type="submit" class="button is-fullwidth is-primary">
-        Submit
-      </button>
-    </div>
-
-    <footer>
-      <p>Already have an account? <a href="/sign-in">Sign in</a></p>
-    </footer>
-  </form>
-</div>
-{{ end }}
+templ New(params types.NewUserParams, errors validate.Errors) {
+	@layout.Unauthenticated("Register") {
+		<form action="/users/register" method="POST" class="card">
+			<header>
+				<h1>Register</h1>
+			</header>
+			<div class={ fieldClass(errors.FieldOne("Email")) }>
+				<label for="email">Email:</label>
+				<input
+					id="email"
+					type="email"
+					name="email"
+					value={ params.Email }
+					autocomplete="email"
+					autofocus
+				/>
+				<p class="error-explanation">{ errors.FieldOne("Email") }</p>
+			</div>
+			<div class={ fieldClass(errors.FieldOne("DisplayName")) }>
+				<label for="displayName">Display name:</label>
+				<input
+					id="displayName"
+					type="text"
+					name="displayName"
+					value={ params.DisplayName }
+					autocomplete="name"
+				/>
+				<p class="error-explanation">{ errors.FieldOne("DisplayName") }</p>
+			</div>
+			<div class={ fieldClass(errors.FieldOne("Password")) }>
+				<label for="password">Password:</label>
+				<input
+					id="password"
+					type="password"
+					name="password"
+					autocomplete="new-password"
+				/>
+				<p class="error-explanation">{ errors.FieldOne("Password") }</p>
+			</div>
+			<div class={ fieldClass(errors.FieldOne("PasswordConfirmation")) }>
+				<label for="passwordConfirmation">Confirm password:</label>
+				<input
+					id="passwordConfirmation"
+					type="password"
+					name="passwordConfirmation"
+					autocomplete="new-password"
+				/>
+				<p class="error-explanation">{ errors.FieldOne("PasswordConfirmation") }</p>
+			</div>
+			<div>
+				<button type="submit" class="button is-fullwidth is-primary">
+					Submit
+				</button>
+			</div>
+			<footer>
+				<p>Already have an account? <a href="/sign-in">Sign in</a></p>
+			</footer>
+		</form>
+	}
+}
 ```
 
 `main.go`:

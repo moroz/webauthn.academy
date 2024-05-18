@@ -1,5 +1,5 @@
 {{- if eq hugo.Environment "development" }}
-  <script type="module" src="http://localhost:5173/src/main.ts"></script>
+  <script type="module" src="http://localhost:4000/src/main.ts"></script>
 {{- else }}
   {{- with resources.Get "main.js" | fingerprint }}
     <script src="{{ .RelPermalink }}" integrity="{{- .Data.Integrity }}" crossorigin="anonymous" type="module"></script>
