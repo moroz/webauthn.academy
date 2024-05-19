@@ -154,6 +154,12 @@ figure {
   margin: 2rem auto;
   counter-increment: figure;
   max-width: 80%;
+
+  &.bordered-figure {
+    img {
+      outline: 1px solid #ccc;
+    }
+  }
 }
 
 figcaption {
@@ -210,7 +216,7 @@ figcaption {
   }
 }
 
-code.language-go {
+pre code {
   tab-size: 4;
 }
 

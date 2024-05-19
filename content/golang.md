@@ -447,7 +447,7 @@ PASS
 ok  	github.com/moroz/webauthn-academy-go/service	(cached)
 ```
 
-### Setting up a router and views 
+## Set up a router
 
 Now that we have the database logic in place, we can try and build a sign up view using HTML and CSS.
 First, install [go-chi/chi](https://github.com/go-chi/chi)---a router for use with `net/http`:
@@ -455,6 +455,48 @@ First, install [go-chi/chi](https://github.com/go-chi/chi)---a router for use wi
 ```plain
 go get -u github.com/go-chi/chi/v5
 ```
+
+Then, in `main.go`, we can set up a router like so:
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+)
+
+func main() {
+	r := chi.NewRouter()
+
+	r.Use(middleware.Logger)
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "<h1>Hello from the router!</h1>")
+	})
+
+	log.Println("Listening on port 3000")
+	log.Fatal(http.ListenAndServe(":3000", r))
+}
+```
+
+Run the server:
+
+```plain
+$ go run .
+2024/05/19 14:46:01 Listening on port 3000
+```
+
+When you visit [localhost:3000](http://localhost:3000) now, you should be greeted by this view:
+
+<figure class="bordered-figure">
+<img src="/golang/01-router-hello-world.png" alt="" />
+<figcaption>A &ldquo;Hello world&rdquo;-like message served using <code>chi-router</code>.</figcaption>
+</figure>
 
 We will be building templates using [templ](https://templ.guide/) instead of Go's built-in `html/template` package.
 This is because Templ makes it much easier to share common data between views (such as flash messages, authentication status, page title, etc.).
@@ -522,10 +564,6 @@ As a part of the build process, Vite appends a hash of each file's contents to t
 Vite produces a "cache manifest" file, containing a mapping of original filenames to their hashed counterparts.
 Therefore, for production deployments, we will need to parse the cache manifest and serve JS and CSS based on its contents.
 However, we can handle this at a later stage of the project.
-
-In all views, we will be setting the `<title>` dynamically, based on the data objects passed to templates.
-I like to organize view assigns into struct types, and using `{{ .Title }}` means that every struct type passed into views has a field or method called `Title`.
-One way to organize shared fields is to use struct embedding. In `handler/helpers.go`, define a `RequestContext` type that we will make use of later:
 
 In `handler/templates/users/new.html.tmpl`, add the registration form template:
 
@@ -604,6 +642,8 @@ templ New(params types.NewUserParams, errors validate.Errors) {
 	}
 }
 ```
+
+## Set
 
 `main.go`:
 
