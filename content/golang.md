@@ -498,6 +498,8 @@ When you visit [localhost:3000](http://localhost:3000) now, you should be greete
 <figcaption>A &ldquo;Hello world&rdquo;-like message served using <code>chi-router</code>.</figcaption>
 </figure>
 
+### Set up `templ` for HTML templating
+
 We will be building templates using [templ](https://templ.guide/) instead of Go's built-in `html/template` package.
 This is because Templ makes it much easier to share common data between views (such as flash messages, authentication status, page title, etc.).
 Install the templ CLI:
@@ -559,11 +561,8 @@ templ Unauthenticated(title string) {
 
 When bundling assets using Vite, the workflow is different between in development and production.
 In development, it suffices to add a `<script>` tag to load the entrypoint script of our JavaScript bundle, and Vite's development server will handle loading CSS automatically.
-In production builds, the JavaScript files are compiled and minified into JavaScript and CSS bundles.
-As a part of the build process, Vite appends a hash of each file's contents to the name of each file in the bundle, so that each file can be cached indefinitely by browsers.
-Vite produces a "cache manifest" file, containing a mapping of original filenames to their hashed counterparts.
-Therefore, for production deployments, we will need to parse the cache manifest and serve JS and CSS based on its contents.
-However, we can handle this at a later stage of the project.
+In production builds, the JavaScript files are compiled and minified into JavaScript and CSS bundles, which means we will be to render separate `<script>` and `<link>` tags, to load JS and CSS, respectively.
+This will require a bit more work, however we can postpone it until later in the walkthrough, when we prepare the application for a production deployment.
 
 In `handler/templates/users/new.html.tmpl`, add the registration form template:
 

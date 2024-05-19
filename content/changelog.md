@@ -2,6 +2,12 @@
 title: Changelog
 ---
 
+## 2024-05-19
+
+* Added a section describing all tools and libraries used in the Go project.
+* Improved wording in the initial part of the Go tutorial.
+* Break the HTTP section into smaller chunks.
+
 ## 2024-05-17
 
 * Further work on registration view: added validation errors in form view.
