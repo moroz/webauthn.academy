@@ -3,7 +3,6 @@ title: Implementing Webauthn in Golang
 ---
 
 This section is dedicated to a framework-agnostic implementation of a Webauthn workflow using the Go programming language.
-Whenever possible, I try to use just the standard library, so with enough knowledge of the Go ecosystem, you should be able to modify the solution to use your preferred libraries.
 
 ## Who this text is for
 
@@ -14,12 +13,37 @@ Therefore I won't be stopping to explain code snippets that I believe should be 
 
 If you have any suggestions for improvements to the tutorial, feel free to [reach out to me](https://github.com/moroz) or to submit a Pull Request or an issue in the [Github repository](https://github.com/moroz/webauthn.academy) of this website.
 
+The source code of the application we are going to build (work in progress) is available on Github: [moroz/webauthn-academy-go](https://github.com/moroz/webauthn-academy-go).
+
+## Technological stack
+
+Whenever possible, I try to use just the standard library, so with enough knowledge of the Go ecosystem, you should be able to modify the solution to use your preferred libraries.
+
+A few command-line tools we will be using in this walkthrough:
+
+* [mise](https://mise.jdx.dev/) --- to manage different versions of programming languages, here Go and Node.js.
+* [goose](https://github.com/pressly/goose) --- to generate and run database migrations,
+* [direnv](https://direnv.net/) --- to manage settings and secrets in environment variables.
+
+This website was developed and written on Debian 12, using Go 1.22.3 and Node 20.13.1, the latest LTS release as of this writing.
+For persistence, I will be using PostgreSQL 16.2, but any reasonably modern version of PostgreSQL should work too.
+
+A few notable Go libraries we will be using in the application:
+
+* [github.com/alexedwards/argon2id](https://pkg.go.dev/github.com/alexedwards/argon2id) --- to hash passwords using the Argon2id password hashing algorithm.
+* [github.com/jmoiron/sqlx](https://github.com/jmoiron/sqlx) --- a thin wrapper over `database/sql` that also allows us to read query results into structs. If you know enough SQL, you should be able to replace it with another solution, such as [sqlc](https://sqlc.dev/) or [gorm](https://gorm.io/) (which is not as fantastic as it claims to be).
+* [github.com/go-webauthn/webauthn](https://github.com/go-webauthn/webauthn) --- the actual WebAuthn implementation. We will be using this library to generate and validate registration and attestation challenges.
+* [templ](https://templ.guide/) --- a type-safe templating language that compiles to Go.
+* [github.com/gorilla/schema](https://github.com/gorilla/schema) --- to parse URL-encoded data into structs.
+* [github.com/gorilla/sessions](https://pkg.go.dev/github.com/gorilla/sessions) --- for persisting session state in cookies. We will be using session storage to display flash notifications, for CSRF protection, and to persist WebAuthn challenges across requests.
+* [github.com/gookit/validate](https://github.com/gookit/validate/) --- for struct validation.
+
+We will be compiling and bundling CSS and JavaScript using [Vite](https://vitejs.dev/), some [TypeScript](https://www.typescriptlang.org/), and [SASS](https://sass-lang.com/).
+
 ## Initial setup
 
 The following walkthrough sets up a password authentication from scratch. Once this text is finalized, you will be able to skip to the section where I start implementing Webauthn. For now, you can just follow along.
 
-Command-line tools we will be using: [mise](https://mise.jdx.dev/), [goose](https://github.com/pressly/goose), [direnv](https://direnv.net/).
-For persistence, I will be using PostgreSQL 16.2, but any reasonably modern version of PostgreSQL should work too.
 
 Create a directory for the new project:
 
@@ -31,8 +55,9 @@ Ensure Golang is installed (here using [mise](https://mise.jdx.dev/)):
 
 ```plain
 cd academy-go
-mise install go@1.22.3
-mise local go
+mise install go@1.22.3 node@lts
+mise local go@1.22.3
+mise local node@lts
 ```
 
 Initialize a Go module in this directory.
@@ -86,6 +111,16 @@ direnv allow
 source .envrc
 ```
 
+The `.envrc` file is likely to contain secrets that should not be committed to Git.
+You can add the actual `.envrc` file to the local `.gitignore` and create a sample `.gitignore` instead:
+
+```plain
+echo .envrc >> .gitignore
+cp .envrc .envrc.sample
+```
+
+### Create a `users` table
+
 Generate a migration file for the `users` table:
 
 ```plain
@@ -114,6 +149,8 @@ create table users (
 drop table users;
 -- +goose StatementEnd
 ```
+
+### Build a database interface for the `users` table
 
 In `types/user.go`, define types representing records in the `users` table and new user registration params:
 
@@ -144,6 +181,7 @@ type NewUserParams struct {
 
 func (p NewUserParams) Messages() map[string]string {
 	return validate.MS{
+		"required": "can't be blank",
 		"email":    "is not a valid email address",
 		"min_len":  "must be between 8 and 80 characters long",
 		"max_len":  "must be between 8 and 80 characters long",
