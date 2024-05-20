@@ -2,6 +2,12 @@
 title: Changelog
 ---
 
+## 2024-05-20
+
+* Added instructions to set up modd.
+* Added basic handler renedering `templ` templates.
+* Added screenshot of unstyled registration page.
+
 ## 2024-05-19
 
 * Added a section describing all tools and libraries used in the Go project.
