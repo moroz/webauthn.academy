@@ -24,6 +24,7 @@ A few command-line tools we will be using in this walkthrough:
 * [mise](https://mise.jdx.dev/) --- to manage different versions of programming languages, here Go and Node.js.
 * [goose](https://github.com/pressly/goose) --- to generate and run database migrations,
 * [direnv](https://direnv.net/) --- to manage settings and secrets in environment variables.
+* [modd](https://github.com/cortesi/modd) --- to automatically rebuild and reload the application.
 
 This website was developed and written on Debian 12, using Go 1.22.3 and Node 20.13.1, the latest LTS release as of this writing.
 For persistence, I will be using PostgreSQL 16.2, but any reasonably modern version of PostgreSQL should work too.
@@ -494,7 +495,7 @@ $ go run .
 When you visit [localhost:3000](http://localhost:3000) now, you should be greeted by this view:
 
 <figure class="bordered-figure">
-<img src="/golang/01-router-hello-world.png" alt="" />
+<a href="/golang/01-router-hello-world.png" target="_blank" rel="noopener noreferrer"><img src="/golang/01-router-hello-world.png" alt="" /></a>
 <figcaption>A &ldquo;Hello world&rdquo;-like message served using <code>chi-router</code>.</figcaption>
 </figure>
 
@@ -529,6 +530,19 @@ Install [dart-sass](https://sass-lang.com/) to compile stylesheets:
 pnpm add sass
 ```
 
+Create an empty directory at `assets/src/css` and an empty file therein:
+
+```plain
+mkdir -p assets/src/css
+touch assets/src/css/style.scss
+```
+
+Replace the contents of `assets/src/main.ts` with a single line, importing the SCSS entrypoint file:
+
+```javascript
+import "./css/style.scss";
+```
+
 Next, define the basic HTML layouts at `templates/layout/root.templ`:
 
 ```go{data-lang="templ"}
@@ -559,10 +573,12 @@ templ Unauthenticated(title string) {
 }
 ```
 
-When bundling assets using Vite, the workflow is different between in development and production.
-In development, it suffices to add a `<script>` tag to load the entrypoint script of our JavaScript bundle, and Vite's development server will handle loading CSS automatically.
-In production builds, the JavaScript files are compiled and minified into JavaScript and CSS bundles, which means we will be to render separate `<script>` and `<link>` tags, to load JS and CSS, respectively.
-This will require a bit more work, however we can postpone it until later in the walkthrough, when we prepare the application for a production deployment.
+We define two layout templates: `RootLayout`, which is the base HTML layout for all context-specific layouts in the application, and `Unauthenticated`, a basic layout used for views shown to unauthenticated visitors, such as the login page or the registration page.
+In the `<head>` part of the `RootLayout` template, we included a `<script>` entrypoint for Vite.
+
+In development, this tag is enough to load the Vite project in the browser, and the script will automatically inject CSS into the DOM.
+However, in production builds, the JavaScript files will be compiled and minified into separate JavaScript and CSS files, and we will need to load them separately.
+This is a bit more involved than the above example, however we don't really need to think about this until we start preparing the project for production deployments.
 
 In `handler/templates/users/new.html.tmpl`, add the registration form template:
 
@@ -642,38 +658,65 @@ templ New(params types.NewUserParams, errors validate.Errors) {
 }
 ```
 
-## Set
+You can generate Go code from `.templ` files using this command:
 
-`main.go`:
+```plain
+templ generate
+```
+
+Now we can write a handler that will render these templates in response to HTTP requests.
+
+```go
+package handler
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/moroz/webauthn-academy-go/service"
+	"github.com/moroz/webauthn-academy-go/templates/users"
+	"github.com/moroz/webauthn-academy-go/types"
+)
+
+type userHandler struct {
+	us service.UserService
+}
+
+func UserHandler(db *sqlx.DB) userHandler {
+	return userHandler{service.NewUserService(db)}
+}
+
+func (h *userHandler) New(w http.ResponseWriter, r *http.Request) {
+	err := users.New(types.NewUserParams{}, nil).Render(r.Context(), w)
+	if err != nil {
+		log.Printf("Rendering error: %s", err)
+	}
+}
+```
+
+Update `main.go` to serve requests to `GET /` with this handler:
 
 ```go
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/moroz/webauthn-academy-go/handler"
 )
 
-func MustGetenv(key string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		msg := fmt.Sprintf("FATAL: Environment variable %s is not set", key)
-		log.Fatal(msg)
-	}
-	return value
-}
-
 func main() {
-	db := sqlx.MustConnect("postgres", MustGetenv("DATABASE_URL"))
+	db := sqlx.MustConnect("postgres", os.Getenv("DATABASE_URL"))
 
 	r := chi.NewRouter()
+	r.Use(middleware.Logger)
 
 	users := handler.UserHandler(db)
 	r.Get("/", users.New)
@@ -681,4 +724,69 @@ func main() {
 	log.Println("Listening on port 3000")
 	log.Fatal(http.ListenAndServe(":3000", r))
 }
+```
+
+If you re-run this project now (using `go run .` in the project's root directory) and navigate to [localhost:3000](http://localhost:3000), you should be greeted with an unstyled registration form like the one below:
+
+<figure class="bordered-figure">
+<a href="/golang/02-sign-up-without-css.png" target="_blank" rel="noopener noreferrer"><img src="/golang/02-sign-up-without-css.png" alt="" /></a>
+<figcaption>The sign up page rendered without CSS at 200% zoom.</figcaption>
+</figure>
+
+At this point, running multiple commands (`templ generate` and `go run .`) just to rebuild the code could already become very tedious.
+Let's set up [modd](https://github.com/cortesi/modd) to rebuild templates and application code.
+Start by installing modd:
+
+```plain
+go install github.com/cortesi/modd/cmd/modd@latest
+```
+
+Then, in a file named `modd.conf` in the root directory of the project, add the following configuration:
+
+```plain
+{
+  daemon +sigterm: cd assets/ && pnpm run dev --port=5173
+}
+
+**/*.templ {
+  prep +onchange: templ generate
+}
+
+**/*.go !**/*_test.go {
+  prep +onchange: go build -o server .
+  daemon +sigterm: ./server
+}
+
+```
+
+This file instructs `modd` to:
+
+* always start the Vite development server in the background whenever we start the project,
+* regenerate view code whenever a `.templ` file is modified,
+* rebuild and restart the application whenever `.go` files are modified (including view code).
+
+Update `.gitignore` to look like this:
+
+```shell
+# Compiled server executable
+/server
+
+# Go code generated by templ
+**/*_templ.go
+
+# Environment variables (machine-specific values and secrets)
+.envrc
+```
+
+Start `modd`:
+
+```plain
+$ modd
+20:06:47: skipping prep: templ generate
+20:06:47: skipping prep: go build -o server .
+20:06:47: daemon: cd assets/ && pnpm run dev --port=5173
+>> starting...
+20:06:47: daemon: ./server
+>> starting...
+2024/05/20 20:06:47 Listening on port 3000
 ```
