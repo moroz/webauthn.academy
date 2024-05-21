@@ -156,8 +156,10 @@ figure {
   max-width: 80%;
 
   &.bordered-figure {
-    img {
-      outline: 1px solid #ccc;
+    @media (prefers-color-scheme: light) {
+      img {
+        outline: 1px solid #ccc;
+      }
     }
   }
 }

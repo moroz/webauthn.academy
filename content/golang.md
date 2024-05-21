@@ -509,46 +509,10 @@ Install the templ CLI:
 go install github.com/a-h/templ/cmd/templ@latest
 ```
 
-We will be using [Vite](https://vitejs.dev/) to compile and bundle CSS and JavaScript assets.
-First, install the [pnpm package manager](https://pnpm.io/) for node using `npm`:
-
-```plain
-npm i -g pnpm
-```
-
-Then, create a Vite project under `assets/`:
-
-```plain
-pnpm create vite@latest assets --template vanilla-ts
-cd assets
-pnpm install
-```
-
-Install [dart-sass](https://sass-lang.com/) to compile stylesheets:
-
-```plain
-pnpm add sass
-```
-
-Create an empty directory at `assets/src/css` and an empty file therein:
-
-```plain
-mkdir -p assets/src/css
-touch assets/src/css/style.scss
-```
-
-Replace the contents of `assets/src/main.ts` with a single line, importing the SCSS entrypoint file:
-
-```javascript
-import "./css/style.scss";
-```
-
 Next, define the basic HTML layouts at `templates/layout/root.templ`:
 
 ```go{data-lang="templ"}
 package layout
-
-import "github.com/moroz/webauthn-academy-go/config"
 
 templ RootLayout(title string) {
 	<!DOCTYPE html>
@@ -556,7 +520,6 @@ templ RootLayout(title string) {
 		<head>
 			<meta charset="UTF-8"/>
 			<title>{ title } | Academy</title>
-			<script type="module" src="http://localhost:5173/src/main.ts"></script>
 		</head>
 		<body>
 			{ children... }
@@ -574,11 +537,6 @@ templ Unauthenticated(title string) {
 ```
 
 We define two layout templates: `RootLayout`, which is the base HTML layout for all context-specific layouts in the application, and `Unauthenticated`, a basic layout used for views shown to unauthenticated visitors, such as the login page or the registration page.
-In the `<head>` part of the `RootLayout` template, we included a `<script>` entrypoint for Vite.
-
-In development, this tag is enough to load the Vite project in the browser, and the script will automatically inject CSS into the DOM.
-However, in production builds, the JavaScript files will be compiled and minified into separate JavaScript and CSS files, and we will need to load them separately.
-This is a bit more involved than the above example, however we don't really need to think about this until we start preparing the project for production deployments.
 
 In `handler/templates/users/new.html.tmpl`, add the registration form template:
 
@@ -733,9 +691,30 @@ If you re-run this project now (using `go run .` in the project's root directory
 <figcaption>The sign up page rendered without CSS at 200% zoom.</figcaption>
 </figure>
 
+### Set up Vite for asset bundling
+
+We will be using [Vite](https://vitejs.dev/) to compile and bundle CSS and JavaScript assets.
+First, install the [pnpm package manager](https://pnpm.io/) for node using `npm`:
+
+```plain
+npm i -g pnpm
+```
+
+Then, create a Vite project under `assets/`:
+
+```plain
+pnpm create vite@latest assets --template vanilla-ts
+cd assets
+pnpm install
+```
+
+### Code reloading with `modd`
+
+With Vite added to the project, we will have to run the Vite development server in the background alongside the application.
 At this point, running multiple commands (`templ generate` and `go run .`) just to rebuild the code could already become very tedious.
 Let's set up [modd](https://github.com/cortesi/modd) to rebuild templates and application code.
-Start by installing modd:
+
+Start by installing `modd`:
 
 ```plain
 go install github.com/cortesi/modd/cmd/modd@latest
@@ -756,7 +735,6 @@ Then, in a file named `modd.conf` in the root directory of the project, add the 
   prep +onchange: go build -o server .
   daemon +sigterm: ./server
 }
-
 ```
 
 This file instructs `modd` to:
@@ -778,7 +756,8 @@ Update `.gitignore` to look like this:
 .envrc
 ```
 
-Start `modd`:
+Now, terminate the application server if you still had it running, and run `modd` in the terminal.
+With a correct setup, the tool should regenerate your views and start the Vite development server:
 
 ```plain
 $ modd
@@ -790,3 +769,231 @@ $ modd
 >> starting...
 2024/05/20 20:06:47 Listening on port 3000
 ```
+
+### Style the page with CSS
+
+Now we can add some CSS to make the page more presentable. We will be writing CSS by hand to show you how simple this can be.
+
+Install [dart-sass](https://sass-lang.com/) to compile stylesheets:
+
+```plain
+pnpm add sass
+```
+
+Create an empty directory at `assets/src/css` and an empty file therein:
+
+```plain
+mkdir -p assets/src/css
+touch assets/src/css/style.scss
+```
+
+Replace the contents of `assets/src/main.ts` with a single line, importing the SCSS entrypoint file:
+
+```javascript
+import "./css/style.scss";
+```
+
+In the `RootLayout` template in `templates/layout/root.templ`, add a `<script>` tag to load assets with Vite:
+
+```go{data-lang="templ"}
+// ...
+
+templ RootLayout(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<title>{ title } | Academy</title>
+			<script type="module" src="http://localhost:5173/src/main.ts"></script>
+		</head>
+		<body>
+			{ children... }
+		</body>
+	</html>
+}
+
+// ...
+```
+
+In development, this change is enough to load the Vite project in the browser, and the script will automatically inject CSS into the DOM.
+However, in production builds, the JavaScript files will be compiled and minified into separate JavaScript and CSS files, and we will need to load them separately.
+This is a bit more involved than the above example, however we don't really need to think about this until we start preparing the project for production deployments.
+
+In `assets/src/css/_palette.scss`, add a few colors (they are all borrowed from [a certain CSS toolkit that I otherwise don't want to use](https://tailwindcss.com/docs/customizing-colors), but it's okay since the aforementioned toolkit is MIT-licensed).
+
+```scss
+$green-50: #f0fdf4;
+$green-100: #dcfce7;
+$green-900: #14532d;
+
+$red-100: #fee2e2;
+$red-200: #fecaca;
+$red-600: #dc2626;
+$red-900: #7f1d1d;
+
+$danger: $red-600;
+
+$body-bg: $green-50;
+$primary: $green-900;
+$primary-darker: desaturate($primary, 20%);
+
+$family-sans: Inter, Arial, Helvetica, sans-serif;
+```
+
+First, let's add some styles to center the form within the page:
+
+```scss
+@import "./palette";
+
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  font-family: $family-sans;
+}
+
+body {
+  background: $body-bg;
+  color: #000;
+}
+
+h1,
+h2 {
+  color: $primary-darker;
+}
+
+a,
+a:visited {
+  color: $primary;
+}
+
+.layout.unauthenticated {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+
+  p:not([class]) {
+    margin: 0;
+  }
+
+  footer,
+  header {
+    text-align: center;
+  }
+
+  header {
+    margin-bottom: 0.75rem;
+  }
+
+  footer {
+    margin-top: 1.75rem;
+  }
+}
+
+.card {
+  padding: 1.5rem;
+  border: 1px solid $primary-darker;
+  box-shadow: 0 0 10px transparentize($primary, 0.8);
+  border-radius: 5px;
+  background: white;
+
+  h1,
+  h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+}
+```
+
+With these changes in place, the form should be displayed in a white card, centered on a light-green page:
+
+<figure class="bordered-figure">
+<a href="/golang/03-sign-up-with-layout.png" target="_blank" rel="noopener noreferrer"><img src="/golang/03-sign-up-with-layout.png" alt="" /></a>
+<figcaption>Partly styled sign up page at 200% zoom.</figcaption>
+</figure>
+
+Then, let's style the form fields and the submit button:
+
+```scss
+.field {
+  margin-bottom: 0.75rem;
+  min-width: 350px;
+
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    color: $primary-darker;
+  }
+
+  input {
+    width: 100%;
+  }
+
+  &.has-error {
+    label {
+      color: $danger;
+    }
+
+    input {
+      border-color: $danger;
+
+      &:focus {
+        outline-color: $danger;
+      }
+    }
+  }
+}
+
+.error-explanation {
+  margin-top: 0.25rem;
+  color: $danger;
+
+  &:empty {
+    display: none;
+  }
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  border: 1px solid #666;
+  height: 40px;
+  border-radius: 3px;
+  font: inherit;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.button.is-primary {
+  color: #fff;
+  background: $primary;
+  font-weight: bold;
+  font-family: inherit;
+  font-size: 1rem;
+  height: 40px;
+  outline: 0;
+  border: 0;
+  border-radius: 3px;
+  margin-top: 0.5rem;
+}
+
+.button.is-fullwidth {
+  width: 100%;
+}
+```
+
+The sign up page should now begin to look like this:
+
+<figure class="bordered-figure">
+<a href="/golang/04-sign-up-styled.png" target="_blank" rel="noopener noreferrer"><img src="/golang/04-sign-up-styled.png" alt="" /></a>
+<figcaption>Fully styled sign up page at 200% zoom.</figcaption>
+</figure>
