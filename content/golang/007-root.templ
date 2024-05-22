@@ -1,0 +1,22 @@
+package layout
+
+templ RootLayout(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<title>{ title } | Academy</title>
+		</head>
+		<body>
+			{ children... }
+		</body>
+	</html>
+}
+
+templ Unauthenticated(title string) {
+	@RootLayout(title) {
+		<div class="layout unauthenticated">
+			{ children... }
+		</div>
+	}
+}

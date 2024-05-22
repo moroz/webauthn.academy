@@ -182,109 +182,11 @@ Finally, the `test` target runs the test suites of all packages in the project. 
 
 In `service/service_test.go`, define a test suite using `stretchr/testify`. This file does not define any specific tests, only a scaffolding for the tests we are going to add in other files.
 
-```go
-package service_test
+{{< file "golang/004-service-test.go" "go" >}}
 
-import (
-	"os"
-	"testing"
+With this file in place, we can set up more specific tests for registration logic. In `service/user_service_test.go`, add tests for the user service:
 
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
-	"github.com/stretchr/testify/suite"
-)
-
-type ServiceTestSuite struct {
-	suite.Suite
-	db *sqlx.DB
-}
-
-func (s *ServiceTestSuite) SetupTest() {
-	conn := os.Getenv("TEST_DATABASE_URL")
-	s.db = sqlx.MustConnect("postgres", conn)
-	s.db.MustExec("truncate users cascade")
-}
-
-func TestServiceTestSuite(t *testing.T) {
-	suite.Run(t, new(ServiceTestSuite))
-}
-```
-
-With this file in place, we can set up more specific tests for registration logic. In `service/user_registration.go`, add tests for the user service:
-
-```go
-package service_test
-
-import (
-	"github.com/alexedwards/argon2id"
-	"github.com/moroz/webauthn-academy-go/service"
-	"github.com/moroz/webauthn-academy-go/store"
-	"github.com/moroz/webauthn-academy-go/types"
-)
-
-func (s *ServiceTestSuite) TestRegisterUser() {
-	params := types.NewUserParams{
-		Email:                "registration@example.com",
-		DisplayName:          "Example User",
-		Password:             "foobar123123",
-		PasswordConfirmation: "foobar123123",
-	}
-
-	srv := service.NewUserService(s.db)
-	user, err, _ := srv.RegisterUser(params)
-	s.NoError(err)
-	s.Equal(params.Email, user.Email)
-	s.Equal(params.DisplayName, user.DisplayName)
-
-	match, err := argon2id.ComparePasswordAndHash(params.Password, user.PasswordHash)
-	s.True(match)
-}
-
-func (s *ServiceTestSuite) TestRegisterUserWithInvalidParams() {
-	params := types.NewUserParams{
-		Email:                "invalid",
-		DisplayName:          "Example User",
-		Password:             "short",
-		PasswordConfirmation: "not matching",
-	}
-
-	srv := service.NewUserService(s.db)
-	user, err, validationErrors := srv.RegisterUser(params)
-	s.NoError(err)
-	s.Nil(user)
-	msg := validationErrors.FieldOne("Email")
-	s.Equal("is not a valid email address", msg)
-	msg = validationErrors.FieldOne("Password")
-	s.Equal("must be between 8 and 80 characters long", msg)
-	msg = validationErrors.FieldOne("PasswordConfirmation")
-	s.Contains(msg, "do not match")
-}
-
-func (s *ServiceTestSuite) TestRegisterUserWithDuplicateEmail() {
-	store := store.NewUserStore(s.db)
-	user, err := store.InsertUser(&types.User{
-		Email:        "duplicate@email.com",
-		PasswordHash: "test",
-		DisplayName:  "John Smith",
-	})
-
-	s.NoError(err)
-
-	srv := service.NewUserService(s.db)
-
-	params := types.NewUserParams{
-		Email:                user.Email,
-		DisplayName:          "Other User",
-		Password:             "foobar123123",
-		PasswordConfirmation: "foobar123123",
-	}
-	user, err, validationErrors := srv.RegisterUser(params)
-	s.Nil(user)
-	s.Nil(err)
-	msg := validationErrors.FieldOne("Email")
-	s.Equal("has already been taken", msg)
-}
-```
+{{< file "golang/005-user-service-test.go" "go" >}}
 
 If you run the tests now, they should all pass:
 
@@ -319,31 +221,7 @@ go get -u github.com/go-chi/chi/v5
 
 Then, in `main.go`, we can set up a router like so:
 
-```go
-package main
-
-import (
-	"fmt"
-	"log"
-	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-)
-
-func main() {
-	r := chi.NewRouter()
-
-	r.Use(middleware.Logger)
-
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "<h1>Hello from the router!</h1>")
-	})
-
-	log.Println("Listening on port 3000")
-	log.Fatal(http.ListenAndServe(":3000", r))
-}
-```
+{{< file "golang/006-main.go" "go" >}}
 
 Run the server:
 
@@ -371,110 +249,13 @@ go install github.com/a-h/templ/cmd/templ@latest
 
 Next, define the basic HTML layouts at `templates/layout/root.templ`:
 
-```go{data-lang="templ"}
-package layout
-
-templ RootLayout(title string) {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<title>{ title } | Academy</title>
-		</head>
-		<body>
-			{ children... }
-		</body>
-	</html>
-}
-
-templ Unauthenticated(title string) {
-	@RootLayout(title) {
-		<div class="layout unauthenticated">
-			{ children... }
-		</div>
-	}
-}
-```
+{{< file "golang/007-root.templ" "plain" >}}
 
 We define two layout templates: `RootLayout`, which is the base HTML layout for all context-specific layouts in the application, and `Unauthenticated`, a basic layout used for views shown to unauthenticated visitors, such as the login page or the registration page.
 
-In `handler/templates/users/new.html.tmpl`, add the registration form template:
+In `templates/users/users.templ`, add the registration form template:
 
-```go{data-lang="templ"}
-package users 
-
-import "github.com/gookit/validate"
-import "github.com/moroz/webauthn-academy-go/types"
-import "github.com/moroz/webauthn-academy-go/templates/layout"
-
-func fieldClass(error string) string {
-	if error != "" {
-		return "field has-error"
-	}
-	return "field"
-}
-
-templ New(params types.NewUserParams, errors validate.Errors) {
-	@layout.Unauthenticated("Register") {
-		<form action="/users/register" method="POST" class="card">
-			<header>
-				<h1>Register</h1>
-			</header>
-			<div class={ fieldClass(errors.FieldOne("Email")) }>
-				<label for="email">Email:</label>
-				<input
-					id="email"
-					type="email"
-					name="email"
-					value={ params.Email }
-					autocomplete="email"
-					autofocus
-				/>
-				<p class="error-explanation">{ errors.FieldOne("Email") }</p>
-			</div>
-			<div class={ fieldClass(errors.FieldOne("DisplayName")) }>
-				<label for="displayName">Display name:</label>
-				<input
-					id="displayName"
-					type="text"
-					name="displayName"
-					value={ params.DisplayName }
-					autocomplete="name"
-				/>
-				<p class="error-explanation">{ errors.FieldOne("DisplayName") }</p>
-			</div>
-			<div class={ fieldClass(errors.FieldOne("Password")) }>
-				<label for="password">Password:</label>
-				<input
-					id="password"
-					type="password"
-					name="password"
-					autocomplete="new-password"
-				/>
-				<p class="error-explanation">{ errors.FieldOne("Password") }</p>
-			</div>
-			<div class={ fieldClass(errors.FieldOne("PasswordConfirmation")) }>
-				<label for="passwordConfirmation">Confirm password:</label>
-				<input
-					id="passwordConfirmation"
-					type="password"
-					name="passwordConfirmation"
-					autocomplete="new-password"
-				/>
-				<p class="error-explanation">{ errors.FieldOne("PasswordConfirmation") }</p>
-			</div>
-			<div>
-				<button type="submit" class="button is-fullwidth is-primary">
-					Submit
-				</button>
-			</div>
-			<footer>
-				<p>Already have an account? <a href="/sign-in">Sign in</a></p>
-			</footer>
-		</form>
-	}
-}
-```
+{{< file "golang/008-users.templ" "plain" >}}
 
 You can generate Go code from `.templ` files using this command:
 
@@ -483,73 +264,17 @@ templ generate
 ```
 
 Now we can write a handler that will render these templates in response to HTTP requests.
+In `handler/user_handler.go`, add the following:
 
-```go
-package handler
-
-import (
-	"log"
-	"net/http"
-
-	"github.com/jmoiron/sqlx"
-	"github.com/moroz/webauthn-academy-go/service"
-	"github.com/moroz/webauthn-academy-go/templates/users"
-	"github.com/moroz/webauthn-academy-go/types"
-)
-
-type userHandler struct {
-	us service.UserService
-}
-
-func UserHandler(db *sqlx.DB) userHandler {
-	return userHandler{service.NewUserService(db)}
-}
-
-func (h *userHandler) New(w http.ResponseWriter, r *http.Request) {
-	err := users.New(types.NewUserParams{}, nil).Render(r.Context(), w)
-	if err != nil {
-		log.Printf("Rendering error: %s", err)
-	}
-}
-```
+{{< file "golang/009-users-handler.go" "go" >}}
 
 Update `main.go` to serve requests to `GET /` with this handler:
 
-```go
-package main
-
-import (
-	"log"
-	"net/http"
-	"os"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
-	"github.com/moroz/webauthn-academy-go/handler"
-)
-
-func main() {
-	db := sqlx.MustConnect("postgres", os.Getenv("DATABASE_URL"))
-
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-
-	users := handler.UserHandler(db)
-	r.Get("/", users.New)
-
-	log.Println("Listening on port 3000")
-	log.Fatal(http.ListenAndServe(":3000", r))
-}
-```
+{{< file "golang/010-main.go" "go" >}}
 
 If you re-run this project now (using `go run .` in the project's root directory) and navigate to [localhost:3000](http://localhost:3000), you should be greeted with an unstyled registration form like the one below:
 
-<figure class="bordered-figure">
-<a href="/golang/02-sign-up-without-css.png" target="_blank" rel="noopener noreferrer"><img src="/golang/02-sign-up-without-css.png" alt="" /></a>
-<figcaption>The sign up page rendered without CSS at 200% zoom.</figcaption>
-</figure>
+{{< figure "/golang/02-sign-up-without-css.png" "The sign up page rendered without CSS at 200% zoom." >}}
 
 ### Set up Vite for asset bundling
 

@@ -1,0 +1,73 @@
+package users 
+
+import "github.com/gookit/validate"
+import "github.com/moroz/webauthn-academy-go/types"
+import "github.com/moroz/webauthn-academy-go/templates/layout"
+
+func fieldClass(error string) string {
+	if error != "" {
+		return "field has-error"
+	}
+	return "field"
+}
+
+templ New(params types.NewUserParams, errors validate.Errors) {
+	@layout.Unauthenticated("Register") {
+		<form action="/users/register" method="POST" class="card">
+			<header>
+				<h1>Register</h1>
+			</header>
+			<div class={ fieldClass(errors.FieldOne("Email")) }>
+				<label for="email">Email:</label>
+				<input
+					id="email"
+					type="email"
+					name="email"
+					value={ params.Email }
+					autocomplete="email"
+					autofocus
+				/>
+				<p class="error-explanation">{ errors.FieldOne("Email") }</p>
+			</div>
+			<div class={ fieldClass(errors.FieldOne("DisplayName")) }>
+				<label for="displayName">Display name:</label>
+				<input
+					id="displayName"
+					type="text"
+					name="displayName"
+					value={ params.DisplayName }
+					autocomplete="name"
+				/>
+				<p class="error-explanation">{ errors.FieldOne("DisplayName") }</p>
+			</div>
+			<div class={ fieldClass(errors.FieldOne("Password")) }>
+				<label for="password">Password:</label>
+				<input
+					id="password"
+					type="password"
+					name="password"
+					autocomplete="new-password"
+				/>
+				<p class="error-explanation">{ errors.FieldOne("Password") }</p>
+			</div>
+			<div class={ fieldClass(errors.FieldOne("PasswordConfirmation")) }>
+				<label for="passwordConfirmation">Confirm password:</label>
+				<input
+					id="passwordConfirmation"
+					type="password"
+					name="passwordConfirmation"
+					autocomplete="new-password"
+				/>
+				<p class="error-explanation">{ errors.FieldOne("PasswordConfirmation") }</p>
+			</div>
+			<div>
+				<button type="submit" class="button is-fullwidth is-primary">
+					Submit
+				</button>
+			</div>
+			<footer>
+				<p>Already have an account? <a href="/sign-in">Sign in</a></p>
+			</footer>
+		</form>
+	}
+}

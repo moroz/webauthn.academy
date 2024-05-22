@@ -1,0 +1,6 @@
+{{- $file := ( .Get 0 ) -}}
+{{- $desc := ( .Get 1 ) -}}
+<figure class="bordered-figure">
+  <a href="{{ $file }}" target="_blank" rel="noopener noreferrer"><img src="{{ $file }}" alt="" /></a>
+  <figcaption>{{ $desc }}</figcaption>
+</figure>
