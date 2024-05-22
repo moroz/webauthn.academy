@@ -26,7 +26,8 @@ A few command-line tools we will be using in this walkthrough:
 * [direnv](https://direnv.net/) --- to manage settings and secrets in environment variables.
 * [modd](https://github.com/cortesi/modd) --- to automatically rebuild and reload the application.
 
-This website was developed and written on Debian 12, using Go 1.22.3 and Node 20.13.1, the latest LTS release as of this writing.
+This website was developed and written mostly on Debian 12, using Go 1.22.3 and Node 20.13.1, the latest LTS release as of this writing.
+I sometimes use Arch, btw.
 For persistence, I will be using PostgreSQL 16.2, but any reasonably modern version of PostgreSQL should work too.
 
 A few notable Go libraries we will be using in the application:
@@ -249,13 +250,13 @@ go install github.com/a-h/templ/cmd/templ@latest
 
 Next, define the basic HTML layouts at `templates/layout/root.templ`:
 
-{{< file "golang/007-root.templ" "plain" >}}
+{{< file "golang/007-root.templ" "html" >}}
 
 We define two layout templates: `RootLayout`, which is the base HTML layout for all context-specific layouts in the application, and `Unauthenticated`, a basic layout used for views shown to unauthenticated visitors, such as the login page or the registration page.
 
 In `templates/users/users.templ`, add the registration form template:
 
-{{< file "golang/008-users.templ" "plain" >}}
+{{< file "golang/008-users.templ" "html" >}}
 
 You can generate Go code from `.templ` files using this command:
 
@@ -380,25 +381,7 @@ import "./css/style.scss";
 
 In the `RootLayout` template in `templates/layout/root.templ`, add a `<script>` tag to load assets with Vite:
 
-```go{data-lang="templ"}
-// ...
-
-templ RootLayout(title string) {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<title>{ title } | Academy</title>
-			<script type="module" src="http://localhost:5173/src/main.ts"></script>
-		</head>
-		<body>
-			{ children... }
-		</body>
-	</html>
-}
-
-// ...
-```
+{{< file "golang/011-root.templ" "html" >}}
 
 In development, this change is enough to load the Vite project in the browser, and the script will automatically inject CSS into the DOM.
 However, in production builds, the JavaScript files will be compiled and minified into separate JavaScript and CSS files, and we will need to load them separately.
@@ -406,179 +389,20 @@ This is a bit more involved than the above example, however we don't really need
 
 In `assets/src/css/_palette.scss`, add a few colors (they are all borrowed from [a certain CSS toolkit that I otherwise don't want to use](https://tailwindcss.com/docs/customizing-colors), but it's okay since the aforementioned toolkit is MIT-licensed).
 
-```scss
-$green-50: #f0fdf4;
-$green-100: #dcfce7;
-$green-900: #14532d;
-
-$red-100: #fee2e2;
-$red-200: #fecaca;
-$red-600: #dc2626;
-$red-900: #7f1d1d;
-
-$danger: $red-600;
-
-$body-bg: $green-50;
-$primary: $green-900;
-$primary-darker: desaturate($primary, 20%);
-
-$family-sans: Inter, Arial, Helvetica, sans-serif;
-```
+{{< file "golang/012-palette.scss" "scss" >}}
 
 First, let's add some styles to center the form within the page:
 
-```scss
-@import "./palette";
-
-*,
-*::after,
-*::before {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  font-size: 100%;
-  font-family: $family-sans;
-}
-
-body {
-  background: $body-bg;
-  color: #000;
-}
-
-h1,
-h2 {
-  color: $primary-darker;
-}
-
-a,
-a:visited {
-  color: $primary;
-}
-
-.layout.unauthenticated {
-  display: grid;
-  place-items: center;
-  height: 100vh;
-
-  p:not([class]) {
-    margin: 0;
-  }
-
-  footer,
-  header {
-    text-align: center;
-  }
-
-  header {
-    margin-bottom: 0.75rem;
-  }
-
-  footer {
-    margin-top: 1.75rem;
-  }
-}
-
-.card {
-  padding: 1.5rem;
-  border: 1px solid $primary-darker;
-  box-shadow: 0 0 10px transparentize($primary, 0.8);
-  border-radius: 5px;
-  background: white;
-
-  h1,
-  h2 {
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
-}
-```
+{{< file "golang/013-style.scss" "scss" >}}
 
 With these changes in place, the form should be displayed in a white card, centered on a light-green page:
 
-<figure class="bordered-figure">
-<a href="/golang/03-sign-up-with-layout.png" target="_blank" rel="noopener noreferrer"><img src="/golang/03-sign-up-with-layout.png" alt="" /></a>
-<figcaption>Partly styled sign up page at 200% zoom.</figcaption>
-</figure>
+{{< figure "/golang/03-sign-up-with-layout.png" "Partly styled sign up page at 200% zoom." >}}
 
 Then, let's style the form fields and the submit button:
 
-```scss
-.field {
-  margin-bottom: 0.75rem;
-  min-width: 350px;
-
-  label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 0.25rem;
-    color: $primary-darker;
-  }
-
-  input {
-    width: 100%;
-  }
-
-  &.has-error {
-    label {
-      color: $danger;
-    }
-
-    input {
-      border-color: $danger;
-
-      &:focus {
-        outline-color: $danger;
-      }
-    }
-  }
-}
-
-.error-explanation {
-  margin-top: 0.25rem;
-  color: $danger;
-
-  &:empty {
-    display: none;
-  }
-}
-
-input[type="text"],
-input[type="password"],
-input[type="email"] {
-  border: 1px solid #666;
-  height: 40px;
-  border-radius: 3px;
-  font: inherit;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-}
-
-.button.is-primary {
-  color: #fff;
-  background: $primary;
-  font-weight: bold;
-  font-family: inherit;
-  font-size: 1rem;
-  height: 40px;
-  outline: 0;
-  border: 0;
-  border-radius: 3px;
-  margin-top: 0.5rem;
-}
-
-.button.is-fullwidth {
-  width: 100%;
-}
-```
+{{< file "golang/014-style.scss" "scss" >}}
 
 The sign up page should now begin to look like this:
 
-<figure class="bordered-figure">
-<a href="/golang/04-sign-up-styled.png" target="_blank" rel="noopener noreferrer"><img src="/golang/04-sign-up-styled.png" alt="" /></a>
-<figcaption>Fully styled sign up page at 200% zoom.</figcaption>
-</figure>
+{{< figure "/golang/04-sign-up-styled.png" "Fully styled sign up page at 200% zoom." >}}

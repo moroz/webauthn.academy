@@ -1,0 +1,16 @@
+$green-50: #f0fdf4;
+$green-100: #dcfce7;
+$green-900: #14532d;
+
+$red-100: #fee2e2;
+$red-200: #fecaca;
+$red-600: #dc2626;
+$red-900: #7f1d1d;
+
+$danger: $red-600;
+
+$body-bg: $green-50;
+$primary: $green-900;
+$primary-darker: desaturate($primary, 20%);
+
+$family-sans: Inter, Arial, Helvetica, sans-serif;
