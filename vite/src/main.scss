@@ -141,7 +141,7 @@ pre.chroma {
 }
 
 :not(pre) a>code {
-  color: blue;
+  color: var(--link-color);
 }
 
 figure img,

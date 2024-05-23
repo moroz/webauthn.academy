@@ -406,3 +406,30 @@ Then, let's style the form fields and the submit button:
 The sign up page should now begin to look like this:
 
 {{< figure "/golang/04-sign-up-styled.png" "Fully styled sign up page at 200% zoom." >}}
+
+## Sign up handler
+
+Now that the registration form is rendering correctly, we can implement the handler that will process the data submitted by that form.
+Since the form is using the POST method and is not marked as `multipart` (which is only necessary if you want to upload files together with other data in a single request), the request body will be submitted in URL-encoded format ([`application/x-www-form-urlencoded`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)).
+Once the request reaches the handler, we can parse the data using [`net/http.Request.ParseForm`](https://pkg.go.dev/net/http#Request.ParseForm), which will populate the [`PostForm`](https://pkg.go.dev/net/http#Request) field on the Request struct.
+In order to convert the data to a `types.NewUserParams` struct, we could do something like this:
+
+```go
+if err := r.ParseForm(); err != nil {
+    // handle bad request
+    return
+}
+
+var params types.NewUserParams
+params.Email = r.PostForm.Get("email")
+params.DisplayName = r.PostForm.Get("displayName")
+params.Password = r.PostForm.Get("password")
+params.PasswordConfirmation = r.PostForm.Get("passwordConfirmation")
+
+// actually try to create a User
+```
+
+As you can imagine, this approach could become extremely tedious, especially if at some point we decided to submit multiple values per form field (e. g. multiple checkboxes in a fieldset).
+Therefore, we are going to use [github.com/gorilla/schema](https://github.com/gorilla/schema) to handle this task for us.
+
+{{< file "golang/015-helpers.go" "go" >}}
