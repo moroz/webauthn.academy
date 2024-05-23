@@ -88,8 +88,8 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 Install [sqlx](https://jmoiron.github.io/sqlx/) and the PostgreSQL driver [pq](https://github.com/lib/pq):
 
 ```plain
-go install github.com/lib/pq
-go install github.com/jmoiron/sqlx
+go get github.com/lib/pq
+go get github.com/jmoiron/sqlx
 ```
 
 Now, let's set up a database. First, create a `.envrc` file. We will be using this file to set environment variables using [direnv](https://direnv.net/).
@@ -432,4 +432,16 @@ params.PasswordConfirmation = r.PostForm.Get("passwordConfirmation")
 As you can imagine, this approach could become extremely tedious, especially if at some point we decided to submit multiple values per form field (e. g. multiple checkboxes in a fieldset).
 Therefore, we are going to use [github.com/gorilla/schema](https://github.com/gorilla/schema) to handle this task for us.
 
+First, install the library:
+
+```plain
+go get github.com/gorilla/schema
+```
+
+Then, in a new file called `handler/helpers.go`, add the following:
+
 {{< file "golang/015-helpers.go" "go" >}}
+
+The `decoder` variable is a shared instance of the schema decoder that we can use to decode the data submitted by multiple requests.
+The `handleError` function is a helper that will help us quickly handle basic HTTP error codes.
+For instance, were we to terminate a request with a [`400 Bad Request`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400) code, 
