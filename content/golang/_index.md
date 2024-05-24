@@ -457,5 +457,8 @@ Then, in a new file called `handler/helpers.go`, add the following:
 {{< file "golang/015-helpers.go" "go" >}}
 
 The `decoder` variable is a shared instance of the schema decoder that we can use to decode the data submitted by multiple requests.
-The `handleError` function is a helper that will help us quickly handle basic HTTP error codes.
-For instance, were we to terminate a request with a [`400 Bad Request`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400) code, 
+The `handleError` function is a helper that will help us quickly terminate unprocessable requests with a simple response based on a HTTP status code.
+
+In `handler/user_handler.go`, add a `Create` method that will handle the user creation action.
+
+{{< file "golang/016-create-user.go" "go" >}}
