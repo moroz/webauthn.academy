@@ -211,6 +211,16 @@ PASS
 ok  	github.com/moroz/webauthn-academy-go/service	(cached)
 ```
 
+## Create a configuration package
+
+In `config/config.go`, add a module to encapsulate the logic for reading and validating application configuration from environment variables.
+
+{{< file "golang/005-config-helper.go" "go" >}}
+
+The helper function `MustGetenv` wraps [`os.Getenv`](https://pkg.go.dev/os#Getenv) so that if any required environment variable is unset or empty, the function will log an error message and terminate the program. Failing early helps identify configuration errors early on, and putting configuration in a single, independent package allows us to import this package anywhere in the program, without having to worry about circular dependency errors.
+
+For now, we only 
+
 ## Set up a router
 
 Now that we have the database logic in place, we can try and build a sign up view using HTML and CSS.

@@ -10,6 +10,9 @@ $container-size: 768px;
   --link-color: #00e;
   --code-fg: #2c3e50;
   --code-bg: #eee;
+  --copy-button-bg: #{darken(rgb(239, 241, 245), 6%)};
+  --copy-button-hover-bg: #{darken(rgb(239, 241, 245), 12%)};
+  --copy-button-active-bg: #{darken(rgb(239, 241, 245), 20%)};
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,6 +22,9 @@ $container-size: 768px;
     --link-color: #42a5f5;
     --code-fg: #{darken(#9aedfe, 12%)};
     --code-bg: #{lighten(#131313, 8%)};
+    --copy-button-bg: #{lighten(#181818, 5%)};
+    --copy-button-hover-bg: #{lighten(#181818, 12%)};
+    --copy-button-active-bg: #{lighten(#181818, 20%)};
   }
 }
 
@@ -205,16 +211,16 @@ figcaption {
   font-family: inherit;
 
   border: 0;
-  background: darken(rgb(239, 241, 245), 6%);
+  background: var(--copy-button-bg);
   padding: 0.25em 0.5em;
   border-radius: 5px;
 
   &:hover {
-    background: darken(rgb(239, 241, 245), 12%);
+    background: var(--copy-button-hover-bg);
   }
 
   &:active {
-    background: darken(rgb(239, 241, 245), 20%);
+    background: var(--copy-button-active-bg);
   }
 }
 
