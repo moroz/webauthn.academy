@@ -19,8 +19,8 @@ $container-size: 768px;
   :root {
     --base-bg: #181818;
     --base-fg: rgba(255, 255, 255, 0.87);
-    --link-color: #42a5f5;
-    --code-fg: #{darken(#9aedfe, 12%)};
+    --link-color: #{lighten(#42a5f5, 2%)};
+    --code-fg: #{lighten(#9aedfe, 5%)};
     --code-bg: #{lighten(#131313, 8%)};
     --copy-button-bg: #{lighten(#181818, 5%)};
     --copy-button-hover-bg: #{lighten(#181818, 12%)};

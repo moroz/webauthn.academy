@@ -283,9 +283,13 @@ Update `main.go` to serve requests to `GET /` with this handler:
 
 {{< file "golang/010-main.go" "go" >}}
 
+Do note that in line 10 we need to import the [`github.com/lib/pq`](https://github.com/lib/pq) library using an `import` statement with the blank identifier `_` as an [explicit package name](https://go.dev/ref/spec#Import_declarations). This package is never called directly, but this import statement is required for its side effects. If you forget to add this import, the call to [`sqlx.MustConnect`](https://pkg.go.dev/github.com/jmoiron/sqlx#MustConnect) will result in a panic.
+
 If you re-run this project now (using `go run .` in the project's root directory) and navigate to [localhost:3000](http://localhost:3000), you should be greeted with an unstyled registration form like the one below:
 
 {{< figure "/golang/02-sign-up-without-css.png" "The sign up page rendered without CSS at 200% zoom." >}}
+
+Now, let's set up some styling.
 
 ### Set up Vite for asset bundling
 
@@ -420,7 +424,7 @@ The sign up page should now begin to look like this:
 ## Sign up handler
 
 Now that the registration form is rendering correctly, we can implement the handler that will process the data submitted by that form.
-Since the form is using the POST method and is not marked as `multipart` (which is only necessary if you want to upload files together with other data in a single request), the request body will be submitted in URL-encoded format ([`application/x-www-form-urlencoded`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)).
+Since the form is using the POST HTTP method and is not marked as `multipart` (which is only necessary if you want to upload files together with other data in a single request), the request body will be submitted in URL-encoded format ([`application/x-www-form-urlencoded`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)).
 Once the request reaches the handler, we can parse the data using [`net/http.Request.ParseForm`](https://pkg.go.dev/net/http#Request.ParseForm), which will populate the [`PostForm`](https://pkg.go.dev/net/http#Request) field on the Request struct.
 In order to convert the data to a `types.NewUserParams` struct, we could do something like this:
 
