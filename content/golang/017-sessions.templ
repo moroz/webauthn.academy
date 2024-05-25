@@ -1,0 +1,40 @@
+package sessions
+
+import "github.com/moroz/webauthn-academy-go/templates/layout"
+
+templ New() {
+	@layout.Unauthenticated("Sign in") {
+		<form action="/sign-in" method="POST" class="card">
+			<header>
+				<h1>Sign in</h1>
+			</header>
+			<div class="field">
+				<label for="email">Email:</label>
+				<input
+					id="email"
+					type="email"
+					name="email"
+					autocomplete="email"
+					autofocus
+				/>
+			</div>
+			<div class="field">
+				<label for="password">Password:</label>
+				<input
+					id="password"
+					type="password"
+					name="password"
+					autocomplete="password"
+				/>
+			</div>
+			<div>
+				<button type="submit" class="button is-primary is-fullwidth">
+					Submit
+				</button>
+			</div>
+			<footer>
+				<p>Don't have an account? <a href="/">Sign up</a></p>
+			</footer>
+		</form>
+	}
+}

@@ -428,7 +428,7 @@ Since the form is using the POST HTTP method and is not marked as `multipart` (w
 Once the request reaches the handler, we can parse the data using [`net/http.Request.ParseForm`](https://pkg.go.dev/net/http#Request.ParseForm), which will populate the [`PostForm`](https://pkg.go.dev/net/http#Request) field on the Request struct.
 In order to convert the data to a `types.NewUserParams` struct, we could do something like this:
 
-```go
+```go {hl_lines=[1 2 3]}
 if err := r.ParseForm(); err != nil {
     // handle bad request
     return
@@ -462,3 +462,20 @@ The `handleError` function is a helper that will help us quickly terminate unpro
 In `handler/user_handler.go`, add a `Create` method that will handle the user creation action.
 
 {{< file "golang/016-create-user.go" "go" >}}
+
+In this method, we decode the submitted HTTP POST data into a `types.NewUserParams` struct, and if the data cannot be parsed, we return a simple [`400 Bad Request`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400) error response.
+Then we validate the params and attempt to insert them into the database. If the validation fails, we re-render the registration form with error messages. Finally, if everything goes smooth, we redirect the user to the `/sign-in` path, which we have not implemented yet.
+
+## Sign in page
+
+In `templates/sessions/sessions.templ`, add a template for the sign in form:
+
+{{< file "golang/017-sessions.templ" "html" >}}
+
+Then, in `handler/session_handler.go`, add the handler that will render this form:
+
+{{< file "golang/018-session-handler.go" "go" >}}
+
+In `main.go`, add the new route at `GET /sign-in`:
+
+{{< file "golang/019-main.go" "go {hl_lines=[13 14 15] linenostart=13}" >}}
