@@ -26,8 +26,7 @@ A few command-line tools we will be using in this walkthrough:
 * [direnv](https://direnv.net/) --- to manage settings and secrets in environment variables.
 * [modd](https://github.com/cortesi/modd) --- to automatically rebuild and reload the application.
 
-This website was developed and written mostly on Debian 12, using Go 1.22.3 and Node 20.13.1, the latest LTS release as of this writing.
-I sometimes use Arch, btw.
+This website was developed and written on a variety of Linux-powered machines, using Go 1.22.3 and Node 20.13.1, the latest LTS release as of this writing.
 For persistence, I will be using PostgreSQL 16.2, but any reasonably modern version of PostgreSQL should work too.
 
 A few notable Go libraries we will be using in the application:
@@ -479,3 +478,7 @@ Then, in `handler/session_handler.go`, add the handler that will render this for
 In `main.go`, add the new route at `GET /sign-in`:
 
 {{< file "golang/019-main.go" "go {hl_lines=[13 14 15] linenostart=13}" >}}
+
+If you navigate to [http://localhost:3000/sign-in](http://localhost:3000/sign-in), you should see a login page like this:
+
+{{< figure "/golang/05-sign-in.png" "The sign in view at 150% zoom." >}}
