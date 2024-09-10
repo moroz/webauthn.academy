@@ -2,13 +2,16 @@
 title: Implementing Webauthn in Golang
 ---
 
-This section is dedicated to a framework-agnostic implementation of a Webauthn workflow using the Go programming language.
+This section is dedicated to an implementation of a Webauthn workflow using the Go programming language.
 
 ## Who this text is for
 
-This website is not meant as a complete learning resource for beginners, but rather a more or less comprehensive overview of Webauthn that I wished were available when I was learning about this technology.
+This website is not meant as a complete learning resource for beginners, but rather a reference implementation of a complete Webauthn workflow.
+It is the text that I wish were available when I first started implementing Webauthn in my applications.
 
-This text assumes that you are an experienced Web developer, with reasonably good knowledge of back end development, the UNIX command line, SQL, and all three languages used in browser environments (HTML, CSS, and JavaScript).
+This text is therefore written for an experienced audience rather than for beginners.
+On the other hand, even if you are a beginner, building a Web application as described in this walkthrough, although painful, is still a better choice than watching another learn-Python-in-3-hours video and trying to wish a job into existence doing absolutely nothing.
+You will need to either possess or acquire a reasonably good knowledge of back end development, the UNIX command line, SQL, and all three languages used in browser environments (HTML, CSS, and JavaScript).
 Therefore I won't be stopping to explain code snippets that I believe should be readable without explanation.
 
 If you have any suggestions for improvements to the tutorial, feel free to [reach out to me](https://github.com/moroz) or to submit a Pull Request or an issue in the [Github repository](https://github.com/moroz/webauthn.academy) of this website.
@@ -24,10 +27,10 @@ A few command-line tools we will be using in this walkthrough:
 * [mise](https://mise.jdx.dev/) --- to manage different versions of programming languages, here Go and Node.js.
 * [goose](https://github.com/pressly/goose) --- to generate and run database migrations,
 * [direnv](https://direnv.net/) --- to manage settings and secrets in environment variables.
-* [modd](https://github.com/cortesi/modd) --- to automatically rebuild and reload the application.
+* [modd](https://github.com/cortesi/modd) --- to automatically rebuild and reload the application upon changes to the source code.
 
-This website was developed and written on a variety of Linux-powered machines, using Go 1.22.3 and Node 20.13.1, the latest LTS release as of this writing.
-For persistence, I will be using PostgreSQL 16.2, but any reasonably modern version of PostgreSQL should work too.
+This website was developed and written on a variety of Linux-powered machines, using Go 1.23.1 and Node 20.17.0.
+The persistence parts were developed against PostgreSQL 16.4, but any reasonably modern version of PostgreSQL should work too.
 
 A few notable Go libraries we will be using in the application:
 
