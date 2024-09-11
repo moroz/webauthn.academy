@@ -2,40 +2,40 @@
 title: Implementing Webauthn in Golang
 ---
 
-This section is dedicated to an implementation of a Webauthn workflow using the Go programming language.
-
-## Who this text is for
+This section is dedicated to an implementation of a WebAuthn ([Web Authentication](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API)) workflow using the Go programming language.
 
 This website is not meant as a complete learning resource for beginners, but rather a reference implementation of a complete Webauthn workflow.
 It is the text that I wish were available when I first started implementing Webauthn in my applications.
 
-This text is therefore written for an experienced audience rather than for beginners.
-On the other hand, even if you are a beginner, building a Web application as described in this walkthrough, although painful, is still a better choice than watching another learn-Python-in-3-hours video and trying to wish a job into existence doing absolutely nothing.
-You will need to either possess or acquire a reasonably good knowledge of back end development, the UNIX command line, SQL, and all three languages used in browser environments (HTML, CSS, and JavaScript).
-Therefore I won't be stopping to explain code snippets that I believe should be readable without explanation.
+## Who this text is for
 
-If you have any suggestions for improvements to the tutorial, feel free to [reach out to me](https://github.com/moroz) or to submit a Pull Request or an issue in the [Github repository](https://github.com/moroz/webauthn.academy) of this website.
+In general, I have written this text with an experienced audience in mind.
+On the other hand, even if you are a beginner, building a Web application as described in this walkthrough, although painful, is likely going to benefit you more than watching another learn-Python-in-3-hours video or trying to wish a job into existence.
+You are going to need a reasonably good knowledge of back end development, the UNIX command line, SQL, and all three languages used in browser environments (HTML, CSS, and JavaScript).
+I may leave several difficult code snippets unexplained, which I believe should be readable without explanation.
 
-The source code of the application we are going to build (work in progress) is available on Github: [moroz/webauthn-academy-go](https://github.com/moroz/webauthn-academy-go).
+If you have any suggestions for improvements to the tutorial, feel free to [reach out to me](https://github.com/moroz) or to submit a Pull Request in the [Github repository](https://github.com/moroz/webauthn.academy) of this website.
+
+The source code of the application we are going to build is available on Github: [moroz/webauthn-academy-go](https://github.com/moroz/webauthn-academy-go).
 
 ## Technological stack
 
-Whenever possible, I try to use just the standard library, so with enough knowledge of the Go ecosystem, you should be able to modify the solution to use your preferred libraries.
+This website was developed on a variety of Linux-powered machines, using Go 1.23.1 and Node 20.17.0, and PostgreSQL 16.4.
+The code should work just fine on any UNIX-like operating system, and possibly even on Windows.
 
-A few command-line tools we will be using in this walkthrough:
+There are several command-line tools we will be using in this walkthrough:
 
 * [mise](https://mise.jdx.dev/) --- to manage different versions of programming languages, here Go and Node.js.
 * [goose](https://github.com/pressly/goose) --- to generate and run database migrations,
 * [direnv](https://direnv.net/) --- to manage settings and secrets in environment variables.
 * [modd](https://github.com/cortesi/modd) --- to automatically rebuild and reload the application upon changes to the source code.
+* [sqlc](https://sqlc.dev/) --- to generate type-safe code for database operations based on the database schema.
 
-This website was developed and written on a variety of Linux-powered machines, using Go 1.23.1 and Node 20.17.0.
-The persistence parts were developed against PostgreSQL 16.4, but any reasonably modern version of PostgreSQL should work too.
-
-A few notable Go libraries we will be using in the application:
+Whenever possible, I try to use just the standard library, so with enough knowledge of the Go ecosystem, you should be able to modify the solution to use your preferred libraries.
+However, there are several libraries that handle everyday tasks much more elegantly than the standard library.
+A few notable Go examples:
 
 * [github.com/alexedwards/argon2id](https://pkg.go.dev/github.com/alexedwards/argon2id) --- to hash passwords using the Argon2id password hashing algorithm.
-* [github.com/jmoiron/sqlx](https://github.com/jmoiron/sqlx) --- a thin wrapper over `database/sql` that also allows us to read query results into structs. If you know enough SQL, you should be able to replace it with another solution, such as [sqlc](https://sqlc.dev/) or [gorm](https://gorm.io/) (which is not as fantastic as it claims to be).
 * [github.com/go-webauthn/webauthn](https://github.com/go-webauthn/webauthn) --- the actual WebAuthn implementation. We will be using this library to generate and validate registration and attestation challenges.
 * [templ](https://templ.guide/) --- a type-safe templating language that compiles to Go.
 * [github.com/gorilla/schema](https://github.com/gorilla/schema) --- to parse URL-encoded data into structs.
