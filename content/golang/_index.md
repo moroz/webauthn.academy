@@ -42,12 +42,11 @@ A few notable Go examples:
 * [github.com/gorilla/sessions](https://pkg.go.dev/github.com/gorilla/sessions) --- for persisting session state in cookies. We will be using session storage to display flash notifications, for CSRF protection, and to persist WebAuthn challenges across requests.
 * [github.com/gookit/validate](https://github.com/gookit/validate/) --- for struct validation.
 
-We will be compiling and bundling CSS and JavaScript using [Vite](https://vitejs.dev/), some [TypeScript](https://www.typescriptlang.org/), and [SASS](https://sass-lang.com/).
+We will be bundling CSS and JavaScript code using [Vite](https://vitejs.dev/), [TypeScript](https://www.typescriptlang.org/), and [SASS](https://sass-lang.com/).
 
 ## Initial setup
 
 The following walkthrough sets up a password authentication from scratch. Once this text is finalized, you will be able to skip to the section where I start implementing Webauthn. For now, you can just follow along.
-
 
 Create a directory for the new project:
 
@@ -57,11 +56,19 @@ mkdir academy-go
 
 Ensure Golang is installed (here using [mise](https://mise.jdx.dev/)):
 
-```plain
-cd academy-go
-mise install go@1.22.3 node@lts
-mise local go@1.22.3
-mise local node@lts
+```shell
+$ cd academy-go
+$ mise install go@1.23.1 node@lts
+
+# Save preferred versions of the Go toolchain and Node.js to .tool-versions
+$ mise local go@1.23.1
+$ mise local node@lts
+
+# Check that Go and Node.js are installed with the correct versions
+$ go version
+go version go1.23.1 linux/amd64
+$ node --version
+v20.17.0
 ```
 
 Initialize a Go module in this directory.
@@ -79,6 +86,43 @@ git branch -M main
 git add .
 git commit -m "Initial commit"
 ```
+
+In the remaining part of this article, I will not include any git commands or commit messages, as this would make the article too verbose.
+I encourage you to commit and push often, even if you think there is "nothing to commit," or if you haven't finished your tasks.
+It is also good practice to write [informative commit messages](https://cbea.ms/git-commit/).
+
+## Simple HTTP router using `chi-router`
+
+Let's build a simple HTTP handler to process incoming requests.
+First, install [go-chi/chi](https://github.com/go-chi/chi)---a routing library built on top of the `net/http` package from the Go standard library:
+
+```plain
+go get -u github.com/go-chi/chi/v5
+```
+
+Then create a file named `main.go` in the project's root directory:
+
+{{< file "golang/006-main.go" "go" >}}
+
+This file uses a common Go idiom: the blocking call to `http.ListenAndServe` is wrapped in a call to `log.Fatal`.
+The blocking call will only return a value if the operation fails, for instance if the port is already in use.
+`log.Fatal` will then log the error message and exit the program with a non-zero exit code.
+
+Run the server:
+
+```plain
+$ go run .
+2024/05/19 14:46:01 Listening on port 3000
+```
+
+When you visit [localhost:3000](http://localhost:3000) now, you should be greeted by this view:
+
+<figure class="bordered-figure">
+<a href="/golang/01-router-hello-world.png" target="_blank" rel="noopener noreferrer"><img src="/golang/01-router-hello-world.png" alt="" /></a>
+<figcaption>A &ldquo;Hello world&rdquo;-like message served using <code>chi-router</code>.</figcaption>
+</figure>
+
+## Database schema migrations using `goose`
 
 We will be writing database migrations using [goose](https://github.com/pressly/goose).
 Install goose in your PATH using the following command:
@@ -223,32 +267,6 @@ The helper function `MustGetenv` wraps [`os.Getenv`](https://pkg.go.dev/os#Geten
 
 For now, we only 
 
-## Set up a router
-
-Now that we have the database logic in place, we can try and build a sign up view using HTML and CSS.
-First, install [go-chi/chi](https://github.com/go-chi/chi)---a router for use with `net/http`:
-
-```plain
-go get -u github.com/go-chi/chi/v5
-```
-
-Then, in `main.go`, we can set up a router like so:
-
-{{< file "golang/006-main.go" "go" >}}
-
-Run the server:
-
-```plain
-$ go run .
-2024/05/19 14:46:01 Listening on port 3000
-```
-
-When you visit [localhost:3000](http://localhost:3000) now, you should be greeted by this view:
-
-<figure class="bordered-figure">
-<a href="/golang/01-router-hello-world.png" target="_blank" rel="noopener noreferrer"><img src="/golang/01-router-hello-world.png" alt="" /></a>
-<figcaption>A &ldquo;Hello world&rdquo;-like message served using <code>chi-router</code>.</figcaption>
-</figure>
 
 ### Set up `templ` for HTML templating
 
