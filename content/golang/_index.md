@@ -1,5 +1,6 @@
 ---
 title: Implementing Webauthn in Golang
+layout: single
 ---
 
 This section is dedicated to an implementation of a WebAuthn ([Web Authentication](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API)) workflow using the Go programming language.
@@ -105,12 +106,12 @@ Then create a file named `main.go` in the project's root directory:
 {{< file "golang/006-main.go" "go" >}}
 
 This file uses a common Go idiom: the blocking call to `http.ListenAndServe` is wrapped in a call to `log.Fatal`.
-The blocking call will only return a value if the operation fails, for instance if the port is already in use.
-`log.Fatal` will then log the error message and exit the program with a non-zero exit code.
+The blocking call will only return a value if the operation fails, for instance if a port is already in use.
+`log.Fatal` will then log the error message and terminate the program with a non-zero exit code.
 
 Run the server:
 
-```plain
+```shell
 $ go run .
 2024/05/19 14:46:01 Listening on port 3000
 ```
@@ -121,6 +122,69 @@ When you visit [localhost:3000](http://localhost:3000) now, you should be greete
 <a href="/golang/01-router-hello-world.png" target="_blank" rel="noopener noreferrer"><img src="/golang/01-router-hello-world.png" alt="" /></a>
 <figcaption>A &ldquo;Hello world&rdquo;-like message served using <code>chi-router</code>.</figcaption>
 </figure>
+
+## Database schema migrations using `goose`
+
+In this section, we are going to set up `goose`, a command-line tool for database [schema migrations](https://en.wikipedia.org/wiki/Schema_migration).
+
+### Installing `goose` using `tools.go`
+
+Since `goose` is a command-line tool separate from our program logic, we want to install it as a standalone application.
+The Go toolchain allows us to track versions of CLI tools in `go.mod` using a technique called `tools.go`.
+
+In the root directory of the project, run this command to download `goose` and add it to the project's dependencies:
+
+```shell
+go get github.com/pressly/goose/v3/cmd/goose@latest
+```
+
+In the same directory, create a file called `tools.go` with the following contents:
+
+```go
+//go:build tools
+// +build tools
+
+package main
+
+import (
+	_ "github.com/pressly/goose/v3/cmd/goose"
+)
+```
+
+Then, create a `Makefile` with the following contents:
+
+```make
+download:
+	go mod download
+
+install.tools: download
+	@echo Installing tools from tools.go
+	@grep _ tools.go | awk -F'"' '{print $$2}' | xargs -tI % go install %
+```
+
+If you run `make install.tools` now, you should end up with `goose` correctly installed in `PATH`:
+
+```shell
+$ make install.tools
+go mod download
+Installing tools from tools.go
+go install github.com/pressly/goose/v3/cmd/goose
+$ which goose
+/home/karol/.local/share/mise/installs/go/1.23.1/bin/goose
+```
+
+Now, let's set up a database. First, create a `.envrc` file. We will be using this file to set environment variables using [direnv](https://direnv.net/).
+
+```shell
+export PGDATABASE=academy_dev
+export DATABASE_URL="postgres://postgres:postgres@localhost/${PGDATABASE}?sslmode=disable"
+export GOOSE_MIGRATION_DIR=db/migrations
+export GOOSE_DRIVER=postgres
+export GOOSE_DBSTRING="$DATABASE_URL"
+```
+
+By setting a `PGDATABASE` variable, we instruct the PostgreSQL CLI tools to connect to the project's database by default.
+`DATABASE_URL` is a database connection string in URL format.
 
 ## Database schema migrations using `goose`
 
@@ -138,15 +202,6 @@ go get github.com/lib/pq
 go get github.com/jmoiron/sqlx
 ```
 
-Now, let's set up a database. First, create a `.envrc` file. We will be using this file to set environment variables using [direnv](https://direnv.net/).
-
-```shell
-export PGDATABASE=academy_dev
-export DATABASE_URL="postgres://postgres:postgres@localhost/${PGDATABASE}?sslmode=disable"
-export GOOSE_MIGRATION_DIR=db/migrations
-export GOOSE_DRIVER=postgres
-export GOOSE_DBSTRING="$DATABASE_URL"
-```
 
 By setting the `GOOSE_MIGRATION_DIR` environment variable, we instruct Goose to look for migration files in the `db/migrations` directory.
 The `GOOSE_DBSTRING` makes Goose run the migration scripts against our development database.
@@ -154,9 +209,9 @@ In the command line, source this script or run `direnv allow` to apply these set
 
 ```shell
 # If you have configured direnv
-direnv allow
+$ direnv allow
 # Otherwise just source this file
-source .envrc
+$ source .envrc
 ```
 
 The `.envrc` file is likely to contain secrets that should not be committed to Git.

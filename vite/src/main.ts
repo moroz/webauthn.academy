@@ -7,22 +7,21 @@ document.querySelectorAll("pre.chroma").forEach((block) => {
   button.textContent = "Copy to clipboard";
 
   button.addEventListener("click", () => {
-    let lines = [...block.querySelectorAll(`span.cl`)]
-      .map((line) => line.textContent)
-      .join("")
-      .trim();
+    let lines = [...block.querySelectorAll(`span.cl`)].map(
+      (line) => line.textContent,
+    );
 
     const isShell = block.querySelector("code.language-shell") !== null;
+    const hasDollar = lines.some((line) => line?.startsWith("$"));
 
-    if (isShell && lines.startsWith("$")) {
+    if (isShell && hasDollar) {
       lines = lines
-        .split("\n")
-        .filter((line) => line.startsWith("$"))
-        .map((line) => line.replace("$ ", ""))
-        .join("\n");
+        .filter((line) => line?.startsWith("$"))
+        .map((line) => line!.replace("$ ", "").trim())
+        .filter(Boolean);
     }
 
-    navigator.clipboard.writeText(lines);
+    navigator.clipboard.writeText(lines.join("\n").trim());
   });
 
   const container = block.parentElement;
