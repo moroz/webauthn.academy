@@ -1,7 +1,16 @@
-@import "./assets/light.css" (prefers-color-scheme: light);
-@import "./assets/dark.css" (prefers-color-scheme: dark);
+@import "./assets/light.css"(prefers-color-scheme: light);
+@import "./assets/dark.css"(prefers-color-scheme: dark);
 
 $container-size: 768px;
+
+$font-monospace: "Source Code Pro",
+  ui-monospace,
+  SFMono-Regular,
+  SF Mono,
+  Menlo,
+  Consolas,
+  Liberation Mono,
+  monospace;
 
 :root {
   color-scheme: light dark;
@@ -13,6 +22,9 @@ $container-size: 768px;
   --copy-button-bg: #{darken(rgb(239, 241, 245), 6%)};
   --copy-button-hover-bg: #{darken(rgb(239, 241, 245), 12%)};
   --copy-button-active-bg: #{darken(rgb(239, 241, 245), 20%)};
+
+  --gist-bg: #f0f3f3;
+  --gist-line-hover-bg: #{transparentize(lighten(#09f, 42.5%), 0.1)};
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,6 +37,7 @@ $container-size: 768px;
     --copy-button-bg: #{lighten(#181818, 5%)};
     --copy-button-hover-bg: #{lighten(#181818, 12%)};
     --copy-button-active-bg: #{lighten(#181818, 20%)};
+    --gist-bg: #2828a36;
   }
 }
 
@@ -51,7 +64,7 @@ body {
   overflow-x: hidden;
   background: var(--base-bg);
 
-  > main {
+  >main {
     flex: 1;
   }
 }
@@ -118,15 +131,7 @@ a {
 
 pre,
 code {
-  font-family:
-    "Source Code Pro",
-    ui-monospace,
-    SFMono-Regular,
-    SF Mono,
-    Menlo,
-    Consolas,
-    Liberation Mono,
-    monospace;
+  font-family: $font-monospace;
 }
 
 pre code {
@@ -138,15 +143,23 @@ pre.chroma {
   padding-top: 0.25em;
   padding-bottom: 0.25em;
   border-radius: 0.25em;
+
+  .line {
+    padding-inline: 0.5em;
+
+    &:hover {
+      background: var(--gist-line-hover-bg);
+    }
+  }
 }
 
-:not(pre) > code {
+:not(pre)>code {
   background: var(--code-bg);
   color: var(--code-fg);
   font-size: 0.875em;
 }
 
-:not(pre) a > code {
+:not(pre) a>code {
   color: var(--link-color);
 }
 
@@ -234,4 +247,36 @@ pre code {
 
 main.content {
   font-size: 1.125em;
+}
+
+.gist {
+  background: var(--gist-bg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .highlight {
+    position: unset;
+  }
+
+  .line {
+    padding-inline: 0;
+  }
+
+  pre {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-inline: 0;
+  }
+
+  h3 {
+    font-size: 1em;
+    font-weight: bold;
+    font-family: $font-monospace;
+    margin-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-inline: 0.75rem;
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
 }

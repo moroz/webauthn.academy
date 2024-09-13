@@ -7,8 +7,8 @@ document.querySelectorAll("pre.chroma").forEach((block) => {
   button.textContent = "Copy to clipboard";
 
   button.addEventListener("click", () => {
-    let lines = [...block.querySelectorAll(`span.cl`)].map(
-      (line) => line.textContent,
+    let lines = [...block.querySelectorAll(`span.cl`)].map((line) =>
+      line.textContent?.trim(),
     );
 
     const isShell = block.querySelector("code.language-shell") !== null;

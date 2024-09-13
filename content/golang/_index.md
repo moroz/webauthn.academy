@@ -103,7 +103,7 @@ go get -u github.com/go-chi/chi/v5
 
 Then create a file named `main.go` in the project's root directory:
 
-{{< file "golang/006-main.go" "go" >}}
+{{< gist "golang/006-main.go" "go" "main.go" >}}
 
 This file uses a common Go idiom: the blocking call to `http.ListenAndServe` is wrapped in a call to `log.Fatal`.
 The blocking call will only return a value if the operation fails, for instance if a port is already in use.
@@ -140,27 +140,11 @@ go get github.com/pressly/goose/v3/cmd/goose@latest
 
 In the same directory, create a file called `tools.go` with the following contents:
 
-```go
-//go:build tools
-// +build tools
-
-package main
-
-import (
-	_ "github.com/pressly/goose/v3/cmd/goose"
-)
-```
+{{< gist "golang/021-tools.go" "go" "tools.go" >}}
 
 Then, create a `Makefile` with the following contents:
 
-```make
-download:
-	go mod download
-
-install.tools: download
-	@echo Installing tools from tools.go
-	@grep _ tools.go | awk -F'"' '{print $$2}' | xargs -tI % go install %
-```
+{{< gist "golang/020-Makefile" "make" "Makefile" >}}
 
 If you run `make install.tools` now, you should end up with `goose` correctly installed in `PATH`:
 
@@ -175,64 +159,56 @@ $ which goose
 
 Now, let's set up a database. First, create a `.envrc` file. We will be using this file to set environment variables using [direnv](https://direnv.net/).
 
-```shell
-export PGDATABASE=academy_dev
-export DATABASE_URL="postgres://postgres:postgres@localhost/${PGDATABASE}?sslmode=disable"
-export GOOSE_MIGRATION_DIR=db/migrations
-export GOOSE_DRIVER=postgres
-export GOOSE_DBSTRING="$DATABASE_URL"
-```
+{{< gist "golang/022-envrc" "shell" ".envrc" >}}
 
 By setting a `PGDATABASE` variable, we instruct the PostgreSQL CLI tools to connect to the project's database by default.
 `DATABASE_URL` is a database connection string in URL format.
 
-## Database schema migrations using `goose`
-
-We will be writing database migrations using [goose](https://github.com/pressly/goose).
-Install goose in your PATH using the following command:
-
-```plain
-go install github.com/pressly/goose/v3/cmd/goose@latest
-```
-
-Install [sqlx](https://jmoiron.github.io/sqlx/) and the PostgreSQL driver [pq](https://github.com/lib/pq):
-
-```plain
-go get github.com/lib/pq
-go get github.com/jmoiron/sqlx
-```
-
-
-By setting the `GOOSE_MIGRATION_DIR` environment variable, we instruct Goose to look for migration files in the `db/migrations` directory.
+`GOOSE_MIGRATION_DIR` instructs Goose to look for migration files in the `db/migrations` directory.
 The `GOOSE_DBSTRING` makes Goose run the migration scripts against our development database.
 In the command line, source this script or run `direnv allow` to apply these settings:
 
 ```shell
 # If you have configured direnv
 $ direnv allow
+
 # Otherwise just source this file
 $ source .envrc
 ```
 
-The `.envrc` file is likely to contain secrets that should not be committed to Git.
-You can add the actual `.envrc` file to the local `.gitignore` and create a sample `.gitignore` instead:
+The `.envrc` file should not be committed to Git. There are two main reasons for that: Firstly, in the future, the `.envrc` will likely contain some secrets that should not be exposed to the outside world, such as passwords, API tokens, etc.
+Secondly, every time you set up the project for local work, you may want to apply some changes to these variables that do not need to be propagated to the upstream Git repository.
+Therefore, we tell Git to ignore this file by adding its filename to `.gitignore` and commit a safe `.envrc.sample` file instead:
 
-```plain
-echo .envrc >> .gitignore
-cp .envrc .envrc.sample
+```shell
+# Create a file with the contents of ".envrc"
+# or append a line if the file exists
+$ echo .envrc >> .gitignore
+
+# Copy the content to the file we want to commit
+$ cp .envrc .envrc.sample
 ```
 
-### Create a `users` table
+If you add new required environment variables to your local `.envrc` file, make sure to also update `.envrc.sample`.
 
-Generate a migration file for the `users` table:
+### `create_users` migration
 
-```plain
-goose create create_users sql
+Create a directory for database migrations. `goose` will not create one automatically and will fail with an error message if the directory does not exist when creating a migration file.
+
+```shell
+mkdir -p db/migrations
 ```
 
-In the newly created migration file (called `db/migrations/20240511103916_create_users.sql` in my case, the timestamp part will be different for you), add instructions to create and tear down a `users` table:
+Generate a migration file for the `users` table. Do note that the file name contains a timestamp and will therefore be different each time you run this command.
 
-{{< file "golang/000-create-users.sql" "sql" >}}
+```shell
+$ goose create create_users sql
+2024/09/13 08:00:48 Created new file: db/migrations/20240913000048_create_users.sql
+```
+
+In the newly created migration file, add instructions to create and tear down a `users` table:
+
+{{< gist "golang/000-create-users.sql" "sql" "db/migrations/20240913000048_create_users.sql" >}}
 
 ### Build a database interface for the `users` table
 
@@ -240,7 +216,6 @@ In `types/user.go`, define types representing records in the `users` table and n
 
 {{< file "golang/001-users.go" "go" >}}
 
-On the `User` type, we define `db:` annotations, so that `sqlx` can map database columns to struct fields (these are not required if the struct field names match database columns).
 On the `NewUserParams` struct type, we define annotations for [gorilla/schema](https://github.com/gorilla/schema) and [gookit/validate](https://github.com/gookit/validate). Later on, we will be using `gorilla/schema` to convert HTTP POST data to structs. `gookit/validate` is a simple validation library.
 
 For reasons I cannot fathom, the Golang ecosystem has settled on the [go-playground/validator](https://pkg.go.dev/github.com/go-playground/validator) library as the state of the art in terms of struct validation.

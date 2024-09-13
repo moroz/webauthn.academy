@@ -1,0 +1,5 @@
+export PGDATABASE=academy_dev
+export DATABASE_URL="postgres://postgres:postgres@localhost/${PGDATABASE}?sslmode=disable"
+export GOOSE_MIGRATION_DIR=db/migrations
+export GOOSE_DRIVER=postgres
+export GOOSE_DBSTRING="$DATABASE_URL"

@@ -1,0 +1,7 @@
+{{- $file := ( .Get 0 ) -}}
+{{- $format := ( .Get 1 ) -}}
+{{- $filename := ( .Get 2 ) -}}
+
+<article class="gist"><h3 class="gist-title">File: {{ $filename -}}</h3>
+{{- ( print "```" $format " {linenos=true}\n" ( readFile $file ) "\n" "```" ) | markdownify -}}
+</article>
