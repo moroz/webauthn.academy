@@ -2,6 +2,25 @@
 title: Changelog
 ---
 
+## 2024-09-13
+
+* Go: Updated instructions for `create_users` migration.
+
+## 2024-09-12
+
+* Go: Added instructions for `tools.go` installation of `goose`.
+* Further improvements to copy and paste handlers.
+
+## 2024-09-11
+
+* Improved copy and paste handling of shell snippets with trailing `$`.
+* Go: `chi-router` example is now the beginning of the tutorial.
+
+## 2024-09-10
+
+* Go: Added a passively aggressive note about Python tutorials.
+* Go: Started updating the tutorial for use with sqlc instead of sqlx.
+
 ## 2024-05-20
 
 * Added instructions to set up modd.
@@ -16,7 +35,7 @@ title: Changelog
 
 ## 2024-05-17
 
-* Further work on registration view: added validation errors in form view.
+* Go: Further work on registration view: added validation errors in form view.
 
 ## 2024-05-16
 

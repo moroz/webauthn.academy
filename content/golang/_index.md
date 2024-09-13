@@ -231,6 +231,8 @@ This migration should create a table with the following columns:
 * `password_hash`: string column to store an password hashed using Argon2 in [PHC string format](https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md),
 * `inserted_at` and `updated_at`: to store creation and modification times, respectively. The timestamps are stored without milliseconds (hence the type name `timestamp(0)`). We will store the times in the UTC time zone, regardless of your geographical location.
 
+## 
+
 ### Build a database interface for the `users` table
 
 In `types/user.go`, define types representing records in the `users` table and new user registration params:
