@@ -231,7 +231,32 @@ This migration should create a table with the following columns:
 * `password_hash`: string column to store an password hashed using Argon2 in [PHC string format](https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md),
 * `inserted_at` and `updated_at`: to store creation and modification times, respectively. The timestamps are stored without milliseconds (hence the type name `timestamp(0)`). We will store the times in the UTC time zone, regardless of your geographical location.
 
-## 
+## Type-safe SQL using `sqlc`
+
+Add the `sqlc` dependency to `go.mod`:
+
+```shell
+go get github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+```
+
+Add the dependency to `tools.go`:
+
+{{< gist "golang/022-tools.go" "go" "tools.go" "hl_lines=[8]" >}}
+
+Install tools using `make install.tools`:
+
+```shell
+$ make install.tools 
+go mod download
+Installing tools from tools.go
+go install github.com/pressly/goose/v3/cmd/goose
+go install github.com/sqlc-dev/sqlc/cmd/sqlc
+
+$ which sqlc
+/home/karol/.local/share/mise/installs/go/1.23.1/bin/sqlc
+```
+
+-- Unrevised content below -- 
 
 ### Build a database interface for the `users` table
 
