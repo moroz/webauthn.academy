@@ -166,7 +166,7 @@ By setting a `PGDATABASE` variable, we instruct the PostgreSQL CLI tools to conn
 
 `GOOSE_MIGRATION_DIR` instructs Goose to look for migration files in the `db/migrations` directory.
 The `GOOSE_DBSTRING` makes Goose run the migration scripts against our development database.
-In the command line, source this script or run `direnv allow` to apply these settings:
+In the command line, source this script or run `direnv allow` to apply these settings and create a database:
 
 ```shell
 # If you have configured direnv
@@ -174,6 +174,9 @@ $ direnv allow
 
 # Otherwise just source this file
 $ source .envrc
+
+# Create the database 
+$ createdb
 ```
 
 The `.envrc` file should not be committed to Git. There are two main reasons for that: Firstly, in the future, the `.envrc` will likely contain some secrets that should not be exposed to the outside world, such as passwords, API tokens, etc.
@@ -209,6 +212,24 @@ $ goose create create_users sql
 In the newly created migration file, add instructions to create and tear down a `users` table:
 
 {{< gist "golang/000-create-users.sql" "sql" "db/migrations/20240913000048_create_users.sql" >}}
+
+You can execute this migration using `goose up`:
+
+```shell
+$ goose up
+2024/09/13 10:48:01 OK   20240913000048_create_users.sql (9.66ms)
+2024/09/13 10:48:01 goose: successfully migrated database to version: 20240913000048
+```
+
+You can check whether the migration was successful by connecting to the database using `psql` and requesting information about the `users` table using `\d+ users`.
+
+This migration should create a table with the following columns:
+
+* `id`: an automatically generated primary key of type `bigint` (equivalent of `int64`),
+* `email`: case-insensitive string column with a unique index,
+* `display_name`,
+* `password_hash`: string column to store an password hashed using Argon2 in [PHC string format](https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md),
+* `inserted_at` and `updated_at`: to store creation and modification times, respectively. The timestamps are stored without milliseconds (hence the type name `timestamp(0)`). We will store the times in the UTC time zone, regardless of your geographical location.
 
 ### Build a database interface for the `users` table
 

@@ -8,7 +8,7 @@ document.querySelectorAll("pre.chroma").forEach((block) => {
 
   button.addEventListener("click", () => {
     let lines = [...block.querySelectorAll(`span.cl`)].map((line) =>
-      line.textContent?.trim(),
+      line.textContent?.trimEnd(),
     );
 
     const isShell = block.querySelector("code.language-shell") !== null;
@@ -17,7 +17,7 @@ document.querySelectorAll("pre.chroma").forEach((block) => {
     if (isShell && hasDollar) {
       lines = lines
         .filter((line) => line?.startsWith("$"))
-        .map((line) => line!.replace("$ ", "").trim())
+        .map((line) => line!.replace("$ ", ""))
         .filter(Boolean);
     }
 

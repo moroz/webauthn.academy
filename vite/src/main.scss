@@ -1,9 +1,10 @@
-@import "./assets/light.css"(prefers-color-scheme: light);
-@import "./assets/dark.css"(prefers-color-scheme: dark);
+@import "./assets/light.css" (prefers-color-scheme: light);
+@import "./assets/dark.css" (prefers-color-scheme: dark);
 
 $container-size: 768px;
 
-$font-monospace: "Source Code Pro",
+$font-monospace:
+  "Source Code Pro",
   ui-monospace,
   SFMono-Regular,
   SF Mono,
@@ -24,7 +25,6 @@ $font-monospace: "Source Code Pro",
   --copy-button-active-bg: #{darken(rgb(239, 241, 245), 20%)};
 
   --gist-bg: #f0f3f3;
-  --gist-line-hover-bg: #{transparentize(lighten(#09f, 42.5%), 0.1)};
 }
 
 @media (prefers-color-scheme: dark) {
@@ -64,7 +64,7 @@ body {
   overflow-x: hidden;
   background: var(--base-bg);
 
-  >main {
+  > main {
     flex: 1;
   }
 }
@@ -146,20 +146,16 @@ pre.chroma {
 
   .line {
     padding-inline: 0.5em;
-
-    &:hover {
-      background: var(--gist-line-hover-bg);
-    }
   }
 }
 
-:not(pre)>code {
+:not(pre) > code {
   background: var(--code-bg);
   color: var(--code-fg);
   font-size: 0.875em;
 }
 
-:not(pre) a>code {
+:not(pre) a > code {
   color: var(--link-color);
 }
 
@@ -273,10 +269,9 @@ main.content {
     font-size: 1em;
     font-weight: bold;
     font-family: $font-monospace;
-    margin-top: 0.5rem;
-    padding-bottom: 0.5rem;
     padding-inline: 0.75rem;
-    margin-bottom: 0;
-    line-height: 1.5;
+    margin: 0;
+    line-height: 46px;
+    height: 46px;
   }
 }
