@@ -256,6 +256,23 @@ $ which sqlc
 /home/karol/.local/share/mise/installs/go/1.23.1/bin/sqlc
 ```
 
+Create a configuration file at `sqlc.yml`:
+
+{{< gist "golang/023-sqlc.yml" "yaml" "sqlc.yml" >}}
+
+This config file tells `sqlc` to generate code for all queries defined in `db/sql/*.sql`.
+`sqlc` will infer data types for database columns based on the schema migrations defined with `goose`.
+
+{{< gist "golang/024-users.sql" "sql" "db/sql/users.sql" >}}
+
+Run the generator:
+
+```shell
+sqlc generate
+```
+
+If there is no output, it means that the generation has completed successfully.
+
 -- Unrevised content below -- 
 
 ### Build a database interface for the `users` table

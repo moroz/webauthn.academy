@@ -1,0 +1,17 @@
+version: "2"
+
+sql:
+  - engine: "postgresql"
+    queries: "db/sql/*.sql"
+    schema: "db/migrations"
+    gen:
+      go:
+        out: "db/queries"
+        sql_package: "pgx/v5"
+        emit_pointers_for_null_types: true
+        emit_result_struct_pointers: true
+        initialisms: ["id", "aaguid"]
+        overrides:
+          - db_type: "public.citext"
+            go_type: "string"
+

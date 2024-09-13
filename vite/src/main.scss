@@ -1,10 +1,9 @@
-@import "./assets/light.css" (prefers-color-scheme: light);
-@import "./assets/dark.css" (prefers-color-scheme: dark);
+@import "./assets/light.css"(prefers-color-scheme: light);
+@import "./assets/dark.css"(prefers-color-scheme: dark);
 
 $container-size: 768px;
 
-$font-monospace:
-  "Source Code Pro",
+$font-monospace: "Source Code Pro",
   ui-monospace,
   SFMono-Regular,
   SF Mono,
@@ -37,7 +36,8 @@ $font-monospace:
     --copy-button-bg: #{lighten(#181818, 5%)};
     --copy-button-hover-bg: #{lighten(#181818, 12%)};
     --copy-button-active-bg: #{lighten(#181818, 20%)};
-    --gist-bg: #2828a36;
+
+    --gist-bg: #282836;
   }
 }
 
@@ -64,7 +64,7 @@ body {
   overflow-x: hidden;
   background: var(--base-bg);
 
-  > main {
+  >main {
     flex: 1;
   }
 }
@@ -149,13 +149,13 @@ pre.chroma {
   }
 }
 
-:not(pre) > code {
+:not(pre)>code {
   background: var(--code-bg);
   color: var(--code-fg);
   font-size: 0.875em;
 }
 
-:not(pre) a > code {
+:not(pre) a>code {
   color: var(--link-color);
 }
 
