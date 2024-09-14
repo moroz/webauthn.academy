@@ -144,7 +144,7 @@ In the same directory, create a file called `tools.go` with the following conten
 
 Then, create a `Makefile` with the following contents:
 
-{{< gist "golang/020-Makefile" "make" "Makefile" >}}
+{{< gist "golang/020-Makefile" "makefile" "Makefile" >}}
 
 If you run `make install.tools` now, you should end up with `goose` correctly installed in `PATH`:
 
@@ -375,13 +375,13 @@ go install github.com/a-h/templ/cmd/templ@latest
 
 Next, define the basic HTML layouts at `templates/layout/root.templ`:
 
-{{< file "golang/007-root.templ" "html" >}}
+{{< file "golang/007-root.templ" "templ" >}}
 
 We define two layout templates: `RootLayout`, which is the base HTML layout for all context-specific layouts in the application, and `Unauthenticated`, a basic layout used for views shown to unauthenticated visitors, such as the login page or the registration page.
 
 In `templates/users/users.templ`, add the registration form template:
 
-{{< file "golang/008-users.templ" "html" >}}
+{{< file "golang/008-users.templ" "templ" >}}
 
 You can generate Go code from `.templ` files using this command:
 
@@ -510,7 +510,7 @@ import "./css/style.scss";
 
 In the `RootLayout` template in `templates/layout/root.templ`, add a `<script>` tag to load assets with Vite:
 
-{{< file "golang/011-root.templ" "html" >}}
+{{< file "golang/011-root.templ" "templ" >}}
 
 In development, this change is enough to load the Vite project in the browser, and the script will automatically inject CSS into the DOM.
 However, in production builds, the JavaScript files will be compiled and minified into separate JavaScript and CSS files, and we will need to load them separately.
@@ -585,7 +585,7 @@ Then we validate the params and attempt to insert them into the database. If the
 
 In `templates/sessions/sessions.templ`, add a template for the sign in form:
 
-{{< file "golang/017-sessions.templ" "html" >}}
+{{< file "golang/017-sessions.templ" "templ" >}}
 
 Then, in `handler/session_handler.go`, add the handler that will render this form:
 

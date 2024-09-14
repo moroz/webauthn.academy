@@ -4,11 +4,6 @@ title = 'Webauthn Academy'
 theme = 'webauthn'
 disableKinds = ["taxonomy", "term"]
 
-[markup.highlight]
-linenos = false
-lineNumbersInTable = false
-noClasses = false
-
 [[menus.main]]
 name = 'Home'
 pageRef = '/'
@@ -59,5 +54,5 @@ name = 'Contact and licensing'
 pageRef = '/contact'
 weight = 40
 
-[markup.goldmark.renderer]
-unsafe= true
+# [markup.goldmark.renderer]
+# unsafe= true
