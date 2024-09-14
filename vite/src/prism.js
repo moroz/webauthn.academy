@@ -1,4 +1,4 @@
-import PrismObject from "prismjs";
+import Prism from "prismjs";
 import "prismjs/components/prism-go";
 import "prismjs/components/prism-markup";
 import "prismjs/components/prism-bash";
@@ -12,7 +12,7 @@ import "prismjs/components/prism-makefile";
 // avoid polluting global namespace.
 // You can mutate PrismObject: registering plugins, deleting languages... As
 // long as you don't re-assign it
-var go = PrismObject.languages.extend("go", {
+var go = Prism.languages.extend("go", {
   keyword:
     /\b(?:break|case|chan|const|continue|default|defer|else|fallthrough|for|func|go(?:to)?|if|import|interface|map|package|range|return|select|struct|switch|type|var|templ|css|script)\b/,
 });
@@ -41,32 +41,32 @@ function re(source, flags) {
 
 spread = re(spread).source;
 
-PrismObject.languages.templ = PrismObject.languages.extend("markup", go);
-PrismObject.languages.templ.tag.pattern = re(
+Prism.languages.templ = Prism.languages.extend("markup", go);
+Prism.languages.templ.tag.pattern = re(
   /<\/?(?:[\w.:-]+(?:<S>+(?:[\w.:$-]+(?:=(?:"(?:\\[\s\S]|[^\\"])*"|'(?:\\[\s\S]|[^\\'])*'|[^\s{'"/>=]+|<BRACES>))?|<SPREAD>))*<S>*\/?)?>/
     .source,
 );
 
-PrismObject.languages.templ.tag.inside["tag"].pattern = /^<\/?[^\s>\/]*/;
-PrismObject.languages.templ.tag.inside["attr-value"].pattern =
+Prism.languages.templ.tag.inside["tag"].pattern = /^<\/?[^\s>\/]*/;
+Prism.languages.templ.tag.inside["attr-value"].pattern =
   /=(?!\{)(?:"(?:\\[\s\S]|[^\\"])*"|'(?:\\[\s\S]|[^\\'])*'|[^\s'">]+)/;
-PrismObject.languages.templ.tag.inside["tag"].inside["class-name"] =
+Prism.languages.templ.tag.inside["tag"].inside["class-name"] =
   /^[A-Z]\w*(?:\.[A-Z]\w*)*$/;
-PrismObject.languages.templ.tag.inside["comment"] = go["comment"];
+Prism.languages.templ.tag.inside["comment"] = go["comment"];
 
-PrismObject.languages.insertBefore(
+Prism.languages.insertBefore(
   "inside",
   "attr-name",
   {
     spread: {
       pattern: re(/<SPREAD>/.source),
-      inside: PrismObject.languages.templ,
+      inside: Prism.languages.templ,
     },
   },
-  PrismObject.languages.templ.tag,
+  Prism.languages.templ.tag,
 );
 
-PrismObject.languages.insertBefore(
+Prism.languages.insertBefore(
   "inside",
   "special-attr",
   {
@@ -79,11 +79,11 @@ PrismObject.languages.insertBefore(
           pattern: /^=(?=\{)/,
           alias: "punctuation",
         },
-        rest: PrismObject.languages.templ,
+        rest: Prism.languages.templ,
       },
     },
   },
-  PrismObject.languages.templ.tag,
+  Prism.languages.templ.tag,
 );
 
 // The following will handle plain text inside tags
@@ -182,12 +182,7 @@ var walkTokens = function(tokens) {
           i--;
         }
 
-        tokens[i] = new PrismObject.Token(
-          "plain-text",
-          plainText,
-          null,
-          plainText,
-        );
+        tokens[i] = new Prism.Token("plain-text", plainText, null, plainText);
       }
     }
 
@@ -197,7 +192,7 @@ var walkTokens = function(tokens) {
   }
 };
 
-PrismObject.hooks.add("after-tokenize", function(env) {
+Prism.hooks.add("after-tokenize", function(env) {
   if (env.language !== "templ") {
     return;
   }
