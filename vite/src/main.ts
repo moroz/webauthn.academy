@@ -1,17 +1,4 @@
 import "./main.scss";
-import Prism from "prismjs";
-import "prismjs/plugins/line-numbers/prism-line-numbers.js";
-import "prismjs/plugins/line-numbers/prism-line-numbers.css";
-
-let code: any;
-
-Prism.hooks.add("before-highlight", (env) => {
-  code = env.element.innerHTML;
-});
-
-Prism.hooks.add("after-highlight", (env) => {
-  env.element.innerHTML = code;
-});
 
 document.querySelectorAll(".gist pre").forEach((pre) => {
   const button = document.createElement("button");

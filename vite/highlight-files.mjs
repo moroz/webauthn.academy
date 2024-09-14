@@ -8,8 +8,6 @@ import Prism from "prismjs";
 
 const files = await glob("public/**/*.html");
 
-globalThis.Prism = Prism;
-
 for (const file of files) {
   const markup = await fs.readFile(file);
   const doc = new DOMParser().parseFromString(markup.toString(), "text/html");

@@ -1,5 +1,4 @@
 import Prism from "prismjs";
-import "prismjs/plugins/line-numbers/prism-line-numbers.js";
 import "prismjs/components/prism-go.js";
 import "prismjs/components/prism-markup.js";
 import "prismjs/components/prism-bash.js";
@@ -201,4 +200,16 @@ Prism.hooks.add("after-tokenize", function(env) {
     return;
   }
   walkTokens(env.tokens);
+});
+
+Prism.hooks.add("after-highlight", (env) => {
+  const parent = env.element.parentElement;
+
+  if (!parent?.classList.contains("line-numbers")) return;
+
+  env.element.innerHTML = env.element.innerHTML
+    .trimEnd()
+    .split("\n")
+    .map((line) => `<span class="line">${line}</span>`)
+    .join("\n");
 });

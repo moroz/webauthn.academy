@@ -255,10 +255,6 @@ main.content {
     overflow: hidden;
   }
 
-  &.line-numbers {
-    position: relative;
-  }
-
   .line {
     padding-inline: 0;
   }
@@ -266,12 +262,11 @@ main.content {
   pre {
     margin-top: 0;
     margin-bottom: 0;
-    white-space: pre-wrap;
-    padding: 1rem;
+    padding: 0.75rem;
   }
 
-  pre.line-numbers {
-    padding: 0 0 1rem;
+  code {
+    white-space: pre-wrap;
   }
 
   h3 {
@@ -282,11 +277,48 @@ main.content {
     margin: 0;
     line-height: 46px;
     height: 46px;
+
+    +pre {
+      padding-top: 0;
+    }
   }
 
   &:not(:hover) {
     .copy-to-clipboard {
       opacity: 0;
+    }
+  }
+
+  .line-numbers {
+    counter-reset: lineNumber;
+    position: relative;
+
+    padding-left: 4rem;
+
+    &::before {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0.75rem;
+      left: 3rem;
+      width: 1px;
+      background: currentColor;
+      opacity: 0.7;
+    }
+
+    .line {
+      position: relative;
+      counter-increment: lineNumber;
+
+      &::before {
+        content: counter(lineNumber);
+        position: absolute;
+        opacity: 0.7;
+        left: -4rem;
+        width: 2.25rem;
+        text-align: right;
+      }
     }
   }
 }
