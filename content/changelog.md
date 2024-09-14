@@ -6,6 +6,7 @@ title: Changelog
 
 * Updated color schemes.
 * Replaced Go-based `chroma` code highlighter with Prism.js.
+* Go: Expanded explanations for `sqlc`.
 
 ## 2024-09-13
 

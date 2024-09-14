@@ -260,6 +260,7 @@ Create a configuration file at `sqlc.yml`:
 
 This config file tells `sqlc` to generate code for all queries defined in `db/sql/*.sql`.
 `sqlc` will infer data types for database columns based on the schema migrations defined with `goose`.
+Other settings of interest include `emit_pointers_for_null_types: true` (instructing `sqlc` to generate structs with pointer types for nullable columns, e. g. `*string` instead of `sql.NullString`).
 
 {{< gist "golang/024-users.sql" "sql" "db/sql/users.sql" >}}
 
@@ -270,6 +271,13 @@ sqlc generate
 ```
 
 If there is no output, it means that the generation has completed successfully.
+Now, in `db/queries`, you should find three files, `db.go`, `models.go`, and `users.sql.go`.
+
+These files contain types, interfaces, and methods that we will use to interact with the database further in the project.
+
+{{< gist "golang/025-users.sql.go" "go" "db/queries/users.sql.go" >}}
+
+
 
 -- Unrevised content below -- 
 
