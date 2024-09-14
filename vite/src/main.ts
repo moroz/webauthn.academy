@@ -1,3 +1,4 @@
+import "prismjs/plugins/line-numbers/prism-line-numbers.css";
 import "./main.scss";
 
 document.querySelectorAll(".gist pre").forEach((pre) => {

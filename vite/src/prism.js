@@ -1,6 +1,5 @@
 import Prism from "prismjs";
 import "prismjs/plugins/line-numbers/prism-line-numbers.js";
-import "prismjs/plugins/line-numbers/prism-line-numbers.css";
 import "prismjs/components/prism-go.js";
 import "prismjs/components/prism-markup.js";
 import "prismjs/components/prism-bash.js";
