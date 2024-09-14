@@ -1,7 +1,7 @@
 @import "tailwind-colors-scss";
 
-@import "./assets/light.css"(prefers-color-scheme: light);
-@import "./assets/dark.css"(prefers-color-scheme: dark);
+@import "./assets/light.css" (prefers-color-scheme: light);
+@import "./assets/dark.css" (prefers-color-scheme: dark);
 
 @mixin dark {
   @media (prefers-color-scheme: dark) {
@@ -11,7 +11,8 @@
 
 $container-size: 800px;
 
-$font-monospace: "Source Code Pro",
+$font-monospace:
+  "Source Code Pro",
   ui-monospace,
   SFMono-Regular,
   SF Mono,
@@ -24,7 +25,8 @@ $font-monospace: "Source Code Pro",
   color-scheme: light dark;
   --base-fg: #222;
   --base-bg: #fff;
-  --link-color: #{$tw-sky-600};
+  --link-color: #{darken($tw-cyan-600, 5%)};
+  --link-visited-color: #{darken($tw-violet-500, 5%)};
   --code-fg: #{$tw-slate-800};
   --code-bg: #{$tw-slate-100};
   --copy-button-bg: #{$tw-slate-200};
@@ -69,7 +71,7 @@ body {
   overflow-x: hidden;
   background: var(--base-bg);
 
-  >main {
+  > main {
     flex: 1;
   }
 }
@@ -80,6 +82,10 @@ header {
 
   h1 {
     margin-bottom: 0.25em;
+  }
+
+  a:visited {
+    color: var(--link-color);
   }
 
   nav {
@@ -126,6 +132,10 @@ a {
   &:hover {
     text-decoration: underline;
   }
+
+  &:visited {
+    color: var(--link-visited-color);
+  }
 }
 
 .container {
@@ -158,13 +168,13 @@ pre.chroma {
   }
 }
 
-:not(pre)>code {
+:not(pre) > code {
   background: var(--code-bg);
   color: var(--code-fg);
   font-size: 0.875em;
 }
 
-:not(pre) a>code {
+:not(pre) a > code {
   color: var(--link-color);
 }
 
@@ -280,7 +290,7 @@ main.content {
     width: 100%;
     word-break: break-all;
 
-    +pre {
+    + pre {
       padding-top: 0;
     }
   }

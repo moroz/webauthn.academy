@@ -13,7 +13,13 @@ for (const file of files) {
   const doc = new DOMParser().parseFromString(markup.toString(), "text/html");
   globalThis.document = doc;
   Prism.highlightAllUnder(doc);
-  const html = doc.documentElement.innerHTML;
-  const minified = await minify(html, { collapseWhitespace: true });
-  await fs.writeFile(file, minified);
+  const html = doc.documentElement.outerHTML;
+  const minified = await minify(html, {
+    collapseWhitespace: true,
+    collapseBooleanAttributes: true,
+    decodeEntities: true,
+    removeAttributeQuotes: true,
+  });
+  const combined = "<!DOCTYPE html>" + minified;
+  await fs.writeFile(file, combined);
 }
