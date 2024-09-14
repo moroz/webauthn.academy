@@ -1,2 +1,3 @@
-document.querySelectorAll("pre.chroma").forEach(o=>{const e=document.createElement("button");e.setAttribute("type","button"),e.className="button copy-to-clipboard",e.textContent="Copy to clipboard",e.addEventListener("click",()=>{let n=[...o.querySelectorAll("span.cl")].map(t=>t.textContent?.trimEnd());const l=o.querySelector("code.language-shell")!==null,r=n.some(t=>t?.startsWith("$"));l&&r&&(n=n.filter(t=>t?.startsWith("$")).map(t=>t.replace("$ ","")).filter(Boolean)),navigator.clipboard.writeText(n.join(`
-`).trim())}),o.parentElement?.appendChild(e)});
+document.querySelectorAll(".gist pre").forEach(o=>{const t=document.createElement("button");t.setAttribute("type","button"),t.className="button copy-to-clipboard",t.textContent="Copy to clipboard",t.addEventListener("click",()=>{let e=o.dataset.code?.split(`
+`);if(!e)return;const l=o.querySelector("code.language-shell")!==null,a=e.some(n=>n?.startsWith("$"));l&&a&&(e=e.filter(n=>n?.startsWith("$")).map(n=>n.replace("$ ","")).filter(Boolean)),navigator.clipboard.writeText(e.join(`
+`).trim())}),o.parentElement?.appendChild(t)});
