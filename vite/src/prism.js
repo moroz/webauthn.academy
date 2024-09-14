@@ -1,10 +1,13 @@
 import Prism from "prismjs";
-import "prismjs/components/prism-go";
-import "prismjs/components/prism-markup";
-import "prismjs/components/prism-bash";
-import "prismjs/components/prism-yaml";
-import "prismjs/components/prism-sql";
-import "prismjs/components/prism-makefile";
+import "prismjs/components/prism-go.js";
+import "prismjs/components/prism-markup.js";
+import "prismjs/components/prism-bash.js";
+import "prismjs/components/prism-yaml.js";
+import "prismjs/components/prism-sql.js";
+import "prismjs/components/prism-makefile.js";
+import "prismjs/components/prism-scss.js";
+import "prismjs/components/prism-elixir.js";
+import "prismjs/components/prism-typescript.js";
 
 // Prism components work on the Prism instance on the window, while prism-
 // react-renderer uses its own Prism instance. We temporarily mount the
@@ -27,13 +30,13 @@ var spread = /(?:\{<S>*\.{3}(?:[^{}]|<BRACES>)*\})/.source;
  */
 function re(source, flags) {
   source = source
-    .replace(/<S>/g, function() {
+    .replace(/<S>/g, function () {
       return space;
     })
-    .replace(/<BRACES>/g, function() {
+    .replace(/<BRACES>/g, function () {
       return braces;
     })
-    .replace(/<SPREAD>/g, function() {
+    .replace(/<SPREAD>/g, function () {
       return spread;
     });
   return RegExp(source, flags);
@@ -87,7 +90,7 @@ Prism.languages.insertBefore(
 );
 
 // The following will handle plain text inside tags
-var stringifyToken = function(token) {
+var stringifyToken = function (token) {
   if (!token) {
     return "";
   }
@@ -100,7 +103,7 @@ var stringifyToken = function(token) {
   return token.content.map(stringifyToken).join("");
 };
 
-var walkTokens = function(tokens) {
+var walkTokens = function (tokens) {
   var openedTags = [];
   for (var i = 0; i < tokens.length; i++) {
     var token = tokens[i];
@@ -119,7 +122,7 @@ var walkTokens = function(tokens) {
           if (
             openedTags.length > 0 &&
             openedTags[openedTags.length - 1].tagName ===
-            stringifyToken(token.content[0].content[1])
+              stringifyToken(token.content[0].content[1])
           ) {
             // Pop matching opening tag
             openedTags.pop();
@@ -192,7 +195,7 @@ var walkTokens = function(tokens) {
   }
 };
 
-Prism.hooks.add("after-tokenize", function(env) {
+Prism.hooks.add("after-tokenize", function (env) {
   if (env.language !== "templ") {
     return;
   }

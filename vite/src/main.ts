@@ -1,6 +1,4 @@
 import "./main.scss";
-import "./prism";
-import "prismjs/components/prism-go";
 
 document.querySelectorAll("pre.chroma").forEach((block) => {
   const button = document.createElement("button");
