@@ -5,7 +5,8 @@
 {{- if eq (len .Params) 4 -}}
   {{- $attrs = (print "{linenos=true," (.Get 3) "}") -}}
 {{- end -}}
+{{- $content := (readFile $file) -}}
 
 <article class="gist"><h3 class="gist-title">File: {{ $filename -}}</h3>
-{{- ( print "```" $format " " $attrs "\n" ( readFile $file ) "\n" "```" ) | markdownify -}}
+  <pre class="language-{{ $format }} line-numbers" data-code="{{- $content | safeHTMLAttr -}}"><code>{{ readFile $file }}</code></pre>
 </article>

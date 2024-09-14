@@ -14,4 +14,3 @@ sql:
         overrides:
           - db_type: "public.citext"
             go_type: "string"
-

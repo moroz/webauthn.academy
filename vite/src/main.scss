@@ -1,3 +1,6 @@
+@import "./assets/light.css"(prefers-color-scheme: light);
+@import "./assets/dark.css"(prefers-color-scheme: dark);
+
 $container-size: 768px;
 
 $font-monospace: "Source Code Pro",
@@ -19,6 +22,7 @@ $font-monospace: "Source Code Pro",
   --copy-button-bg: #{darken(rgb(239, 241, 245), 6%)};
   --copy-button-hover-bg: #{darken(rgb(239, 241, 245), 12%)};
   --copy-button-active-bg: #{darken(rgb(239, 241, 245), 20%)};
+  --font-monospace: #{$font-monospace};
 
   --gist-bg: #f0f3f3;
 }
@@ -190,23 +194,6 @@ figcaption {
   line-height: 1.5;
 }
 
-.highlight {
-  position: relative;
-
-  &:not(:hover) {
-    .copy-to-clipboard {
-      opacity: 0;
-    }
-  }
-
-  &:has(.line:only-child) {
-    .copy-to-clipboard {
-      top: 50%;
-      transform: translateY(-50%);
-    }
-  }
-}
-
 .copy-to-clipboard {
   position: absolute;
   top: 0.5rem;
@@ -248,8 +235,8 @@ main.content {
   flex-direction: column;
   position: relative;
 
-  .highlight {
-    position: unset;
+  &.line-numbers {
+    position: relative;
   }
 
   .line {
@@ -259,7 +246,12 @@ main.content {
   pre {
     margin-top: 0;
     margin-bottom: 0;
-    padding-inline: 0;
+    white-space: pre-wrap;
+    padding: 1rem;
+  }
+
+  pre.line-numbers {
+    padding: 0 0 1rem;
   }
 
   h3 {
@@ -270,5 +262,18 @@ main.content {
     margin: 0;
     line-height: 46px;
     height: 46px;
+  }
+
+  &:not(:hover) {
+    .copy-to-clipboard {
+      opacity: 0;
+    }
+  }
+
+  &:has(.line:only-child) {
+    .copy-to-clipboard {
+      top: 50%;
+      transform: translateY(-50%);
+    }
   }
 }

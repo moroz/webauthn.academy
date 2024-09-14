@@ -1,17 +1,16 @@
 import "./main.scss";
 
-document.querySelectorAll("pre.chroma").forEach((block) => {
+document.querySelectorAll(".gist pre").forEach((pre) => {
   const button = document.createElement("button");
   button.setAttribute("type", "button");
   button.className = "button copy-to-clipboard";
   button.textContent = "Copy to clipboard";
 
   button.addEventListener("click", () => {
-    let lines = [...block.querySelectorAll(`span.cl`)].map((line) =>
-      line.textContent?.trimEnd(),
-    );
+    let lines = (pre as HTMLPreElement).dataset.code?.split("\n") as string[];
+    if (!lines) return;
 
-    const isShell = block.querySelector("code.language-shell") !== null;
+    const isShell = pre.querySelector("code.language-shell") !== null;
     const hasDollar = lines.some((line) => line?.startsWith("$"));
 
     if (isShell && hasDollar) {
@@ -24,6 +23,6 @@ document.querySelectorAll("pre.chroma").forEach((block) => {
     navigator.clipboard.writeText(lines.join("\n").trim());
   });
 
-  const container = block.parentElement;
+  const container = pre.parentElement;
   container?.appendChild(button);
 });
