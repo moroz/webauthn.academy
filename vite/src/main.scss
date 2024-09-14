@@ -276,7 +276,9 @@ main.content {
     padding-inline: 0.75rem;
     margin: 0;
     line-height: 46px;
-    height: 46px;
+    min-height: 46px;
+    width: 100%;
+    word-break: break-all;
 
     +pre {
       padding-top: 0;
