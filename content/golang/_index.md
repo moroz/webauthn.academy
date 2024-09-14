@@ -119,10 +119,7 @@ $ go run .
 
 When you visit [localhost:3000](http://localhost:3000) now, you should be greeted by this view:
 
-<figure class="bordered-figure">
-<a href="/golang/01-router-hello-world.png" target="_blank" rel="noopener noreferrer"><img src="/golang/01-router-hello-world.png" alt="" /></a>
-<figcaption>A &ldquo;Hello world&rdquo;-like message served using <code>chi-router</code>.</figcaption>
-</figure>
+{{< figure "/golang/01-router-hello-world.png" "A &ldquo;Hello world&rdquo;-like message served using <code>chi-router</code>." >}}
 
 ## Database schema migrations using `goose`
 

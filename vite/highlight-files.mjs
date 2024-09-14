@@ -8,9 +8,12 @@ import Prism from "prismjs";
 
 const files = await glob("public/**/*.html");
 
+globalThis.Prism = Prism;
+
 for (const file of files) {
   const markup = await fs.readFile(file);
   const doc = new DOMParser().parseFromString(markup.toString(), "text/html");
+  globalThis.document = doc;
   Prism.highlightAllUnder(doc);
   const html = doc.documentElement.innerHTML;
   const minified = await minify(html, { collapseWhitespace: true });
