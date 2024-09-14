@@ -23,8 +23,6 @@ $font-monospace: "Source Code Pro",
   --copy-button-hover-bg: #{darken(rgb(239, 241, 245), 12%)};
   --copy-button-active-bg: #{darken(rgb(239, 241, 245), 20%)};
   --font-monospace: #{$font-monospace};
-
-  --gist-bg: #f0f3f3;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -37,8 +35,6 @@ $font-monospace: "Source Code Pro",
     --copy-button-bg: #{lighten(#181818, 5%)};
     --copy-button-hover-bg: #{lighten(#181818, 12%)};
     --copy-button-active-bg: #{lighten(#181818, 20%)};
-
-    --gist-bg: #282836;
   }
 }
 

@@ -1,5 +1,5 @@
-import "prismjs/plugins/line-numbers/prism-line-numbers.css";
 import "./main.scss";
+import "prismjs/plugins/line-numbers/prism-line-numbers.css";
 
 document.querySelectorAll(".gist pre").forEach((pre) => {
   const button = document.createElement("button");
