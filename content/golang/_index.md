@@ -22,7 +22,8 @@ The source code of the application we are going to build is available on Github:
 ## Technological stack
 
 This website was developed on a variety of Linux-powered machines, using Go 1.23.1 and Node 20.17.0, and PostgreSQL 16.4.
-The code should work just fine on any UNIX-like operating system, and possibly even on Windows.
+The back end application should work exactly the same on any UNIX-like operating system, and possibly even on Windows.
+However, the Web Authentication API in the browser is only supported on Linux, macOS, and Windows.
 
 There are several command-line tools we will be using in this walkthrough:
 

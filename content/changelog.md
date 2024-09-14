@@ -2,6 +2,11 @@
 title: Changelog
 ---
 
+## 2024-09-14
+
+* Updated color schemes.
+* Replaced Go-based `chroma` code highlighter with Prism.js.
+
 ## 2024-09-13
 
 * Go: Updated instructions for `create_users` migration.

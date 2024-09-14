@@ -3,6 +3,12 @@
 @import "./assets/light.css"(prefers-color-scheme: light);
 @import "./assets/dark.css"(prefers-color-scheme: dark);
 
+@mixin dark {
+  @media (prefers-color-scheme: dark) {
+    @content;
+  }
+}
+
 $container-size: 768px;
 
 $font-monospace: "Source Code Pro",
@@ -29,7 +35,7 @@ $font-monospace: "Source Code Pro",
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --base-bg: #{$tw-slate-950};
+    --base-bg: #{$tw-slate-900};
     --base-fg: rgba(255, 255, 255, 0.87);
     --link-color: #{$tw-cyan-300};
     --code-fg: #{$tw-slate-200};
@@ -242,6 +248,12 @@ main.content {
   flex-direction: column;
   position: relative;
   border-radius: 3px;
+
+  @include dark {
+    border: 1px solid #2a4555;
+    border-radius: 5px;
+    overflow: hidden;
+  }
 
   &.line-numbers {
     position: relative;
