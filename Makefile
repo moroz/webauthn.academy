@@ -11,6 +11,6 @@ assets: FORCE
 highlight:
 	deno run --allow-read --allow-write --allow-env vite/highlight-files.mjs
 
-build:
+build: assets
 	hugo
 	make highlight

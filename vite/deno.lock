@@ -10,6 +10,7 @@
       "npm:sass@^1.77.0": "npm:sass@1.78.0",
       "npm:svelte-check@^3.6.7": "npm:svelte-check@3.8.6_svelte@4.2.19_sass@1.78.0_typescript@5.6.2",
       "npm:svelte@^4.2.12": "npm:svelte@4.2.19",
+      "npm:tailwind-colors-scss@^1.0.1": "npm:tailwind-colors-scss@1.0.1",
       "npm:tslib@^2.6.2": "npm:tslib@2.7.0",
       "npm:typescript@^5.2.2": "npm:typescript@5.6.2",
       "npm:vite@^5.2.0": "npm:vite@5.4.5_sass@1.78.0"
@@ -674,6 +675,10 @@
           "periscopic": "periscopic@3.1.0"
         }
       },
+      "tailwind-colors-scss@1.0.1": {
+        "integrity": "sha512-6VZUrLDhCMXU5xN5sjL/Th4DehcomJV9LE9b4H4dg5sYDjwDNBOOVzf+e9vxKRKfQ2tPGTs/NJ95rVhuVuSqxA==",
+        "dependencies": {}
+      },
       "to-regex-range@5.0.1": {
         "integrity": "sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==",
         "dependencies": {
@@ -780,6 +785,7 @@
         "npm:sass@^1.77.0",
         "npm:svelte-check@^3.6.7",
         "npm:svelte@^4.2.12",
+        "npm:tailwind-colors-scss@^1.0.1",
         "npm:tslib@^2.6.2",
         "npm:typescript@^5.2.2",
         "npm:vite@^5.2.0"

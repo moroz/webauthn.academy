@@ -7,6 +7,11 @@ document.querySelectorAll(".gist pre").forEach((pre) => {
   button.className = "button copy-to-clipboard";
   button.textContent = "Copy to clipboard";
 
+  let lines = (pre as HTMLPreElement).dataset.code?.split("\n") as string[];
+  if (lines.length === 1) {
+    button.classList.add("is-centered");
+  }
+
   button.addEventListener("click", () => {
     let lines = (pre as HTMLPreElement).dataset.code?.split("\n") as string[];
     if (!lines) return;

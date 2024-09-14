@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "prismjs": "^1.29.0",
-    "sass": "^1.77.0"
+    "sass": "^1.77.0",
+    "tailwind-colors-scss": "^1.0.1"
   }
 }

@@ -1,3 +1,5 @@
+@import "tailwind-colors-scss";
+
 @import "./assets/light.css"(prefers-color-scheme: light);
 @import "./assets/dark.css"(prefers-color-scheme: dark);
 
@@ -16,25 +18,25 @@ $font-monospace: "Source Code Pro",
   color-scheme: light dark;
   --base-fg: #222;
   --base-bg: #fff;
-  --link-color: #00e;
-  --code-fg: #2c3e50;
-  --code-bg: #eee;
-  --copy-button-bg: #{darken(rgb(239, 241, 245), 6%)};
-  --copy-button-hover-bg: #{darken(rgb(239, 241, 245), 12%)};
-  --copy-button-active-bg: #{darken(rgb(239, 241, 245), 20%)};
+  --link-color: #{$tw-sky-600};
+  --code-fg: #{$tw-slate-800};
+  --code-bg: #{$tw-slate-100};
+  --copy-button-bg: #{$tw-slate-200};
+  --copy-button-hover-bg: #{$tw-slate-300};
+  --copy-button-active-bg: #{$tw-slate-400};
   --font-monospace: #{$font-monospace};
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --base-bg: #181818;
+    --base-bg: #{$tw-slate-950};
     --base-fg: rgba(255, 255, 255, 0.87);
-    --link-color: #{lighten(#42a5f5, 2%)};
-    --code-fg: #{lighten(#9aedfe, 5%)};
-    --code-bg: #{lighten(#131313, 8%)};
-    --copy-button-bg: #{lighten(#181818, 5%)};
-    --copy-button-hover-bg: #{lighten(#181818, 12%)};
-    --copy-button-active-bg: #{lighten(#181818, 20%)};
+    --link-color: #{$tw-cyan-300};
+    --code-fg: #{$tw-slate-200};
+    --code-bg: #{$tw-slate-700};
+    --copy-button-bg: #{$tw-slate-700};
+    --copy-button-hover-bg: #{$tw-slate-600};
+    --copy-button-active-bg: #{$tw-slate-500};
   }
 }
 
@@ -114,6 +116,10 @@ nav {
 a {
   color: var(--link-color);
   text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .container {
@@ -204,6 +210,11 @@ figcaption {
   padding: 0.25em 0.5em;
   border-radius: 5px;
 
+  &.is-centered {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
   &:hover {
     background: var(--copy-button-hover-bg);
   }
@@ -230,6 +241,7 @@ main.content {
   display: flex;
   flex-direction: column;
   position: relative;
+  border-radius: 3px;
 
   &.line-numbers {
     position: relative;
@@ -263,13 +275,6 @@ main.content {
   &:not(:hover) {
     .copy-to-clipboard {
       opacity: 0;
-    }
-  }
-
-  &:has(.line:only-child) {
-    .copy-to-clipboard {
-      top: 50%;
-      transform: translateY(-50%);
     }
   }
 }
