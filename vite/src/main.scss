@@ -9,7 +9,7 @@
   }
 }
 
-$container-size: 768px;
+$container-size: 800px;
 
 $font-monospace: "Source Code Pro",
   ui-monospace,
@@ -129,7 +129,7 @@ a {
 }
 
 .container {
-  width: 768px;
+  width: $container-size;
   margin: 0 auto;
 
   @media screen and (max-width: 768px) {
