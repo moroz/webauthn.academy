@@ -1,7 +1,7 @@
 {{- $file := ( .Get 0 ) -}}
 {{- $format := ( .Get 1 ) -}}
 {{- $filename := ( .Get 2 ) -}}
-{{- $attrs := "{\"linenostart\":0}" -}}
+{{- $attrs := "{\"linenostart\":1}" -}}
 {{- if eq (len .Params) 4 -}}
   {{- $attrs = (.Get 3) -}}
 {{- end -}}
