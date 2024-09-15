@@ -17,10 +17,19 @@ $container-size: 800px;
   }
 }
 
-$font-monospace: "Source Code Pro",
-  ui-monospace,
+@mixin light {
+  @media (prefers-color-scheme: light) {
+    @content;
+  }
+}
+
+$font-monospace: Consolas,
   SFMono-Regular,
   SF Mono,
+  "Roboto Mono",
+  "Droid Sans Mono",
+  "Source Code Pro",
+  ui-monospace,
   Menlo,
   Consolas,
   Liberation Mono,
@@ -38,6 +47,7 @@ $font-monospace: "Source Code Pro",
   --copy-button-hover-bg: #{$tw-slate-300};
   --copy-button-active-bg: #{$tw-slate-400};
   --font-monospace: #{$font-monospace};
+  --border-color: #767676;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -227,10 +237,10 @@ figcaption {
   cursor: pointer;
   font-family: inherit;
 
-  border: 0;
+  border: 1px solid var(--border-color);
   background: var(--copy-button-bg);
   padding: 0.25em 0.5em;
-  border-radius: 5px;
+  border-radius: 3px;
 
   &.is-centered {
     top: 50%;
@@ -279,17 +289,20 @@ main.content {
   display: flex;
   flex-direction: column;
   position: relative;
-  border-radius: 3px;
+  border-radius: 5px;
   font-size: 1rem;
+  overflow: hidden;
 
   @include dark {
     border: 1px solid #2a4555;
-    border-radius: 5px;
-    overflow: hidden;
+  }
+
+  @include light {
+    border: 1px solid var(--border-color);
   }
 
   @include mobile {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
   }
 
   .line {
@@ -337,6 +350,13 @@ main.content {
   .line-numbers {
     counter-reset: lineNumber;
     position: relative;
+    --line-number-color: var(--border-color);
+    --line-number-opacity: 1;
+
+    @include dark {
+      --line-number-color: currentColor;
+      --line-number-opacity: 0.7;
+    }
 
     padding-left: 4em;
 
@@ -348,8 +368,8 @@ main.content {
       bottom: 0.75rem;
       left: 3em;
       width: 1px;
-      background: currentColor;
-      opacity: 0.7;
+      background: var(--line-number-color);
+      opacity: var(--line-number-opacity);
     }
 
     .line {
@@ -358,8 +378,9 @@ main.content {
 
       &::before {
         content: counter(lineNumber);
+        color: var(--line-number-color);
         position: absolute;
-        opacity: 0.7;
+        opacity: var(--line-number-opacity);
         left: -4em;
         width: 2.25em;
         text-align: right;

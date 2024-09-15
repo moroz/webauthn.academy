@@ -274,10 +274,19 @@ If there is no output, it means that the generation has completed successfully.
 Now, in `db/queries`, you should find three files, `db.go`, `models.go`, and `users.sql.go`.
 
 These files contain types, interfaces, and methods that we will use to interact with the database further in the project.
+Based on the short snippet of SQL code in `db/sql/users.sql`, `sqlc` managed to generate the following code:
 
 {{< gist "golang/025-users.sql.go" "go" "db/queries/users.sql.go" >}}
 
+Even though the query we wrote ended with `returning *`, `sqlc` expanded the asterisk into all the corresponding columns, defined all the necessary data structures, and generated type-safe code for this operation. Impressive!
 
+## Implementing user registration logic
+
+In this section, we will implement the business logic for the user registration workflow.
+The logic will be implemented within the `services` package.
+Define a `UserService` type in `services/user_service.go`:
+
+{{< gist "golang/026-user_service.go" "go" "services/user_service.go" >}}
 
 -- Unrevised content below -- 
 
