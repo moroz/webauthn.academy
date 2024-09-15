@@ -1,12 +1,12 @@
 {{- $file := ( .Get 0 ) -}}
 {{- $format := ( .Get 1 ) -}}
 {{- $filename := ( .Get 2 ) -}}
-{{- $attrs := "{linenos=true}" -}}
+{{- $attrs := "{\"linenostart\":0}" -}}
 {{- if eq (len .Params) 4 -}}
-  {{- $attrs = (print "{linenos=true," (.Get 3) "}") -}}
+  {{- $attrs = (.Get 3) -}}
 {{- end -}}
 {{- $content := (readFile $file) -}}
 
 <article class="gist"><h3 class="gist-title">File: {{ $filename -}}</h3>
-  <pre class="language-{{ $format }} line-numbers" data-code="{{- $content | safeHTMLAttr -}}"><code>{{ readFile $file }}</code></pre>
+  <pre class="language-{{ $format }} line-numbers" data-code="{{- $content | safeHTMLAttr -}}" data-meta="{{- $attrs | safeHTMLAttr -}}"><code>{{ $content }}</code></pre>
 </article>

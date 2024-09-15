@@ -207,9 +207,20 @@ Prism.hooks.add("after-highlight", (env) => {
 
   if (!parent?.classList.contains("line-numbers")) return;
 
+  const meta = parent.dataset.meta;
+  let parsed = {};
+  if (meta) {
+    try {
+      parsed = JSON.parse(meta);
+    } catch { }
+  }
+  const { linenostart = 1 } = parsed;
+
   env.element.innerHTML = env.element.innerHTML
     .trimEnd()
     .split("\n")
     .map((line) => `<span class="line">${line}</span>`)
     .join("\n");
+
+  parent.style = `counter-reset: lineNumber ${linenostart - 1}`;
 });

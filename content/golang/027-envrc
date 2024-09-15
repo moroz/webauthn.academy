@@ -1,0 +1,3 @@
+# append these lines at the end
+export TEST_DATABASE_NAME=academy_test
+export TEST_DATABASE_URL="postgres://postgres:postgres@localhost/${TEST_DATABASE_NAME}?sslmode=disable"

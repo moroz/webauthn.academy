@@ -207,7 +207,7 @@ $ goose create create_users sql
 2024/09/13 08:00:48 Created new file: db/migrations/20240913000048_create_users.sql
 ```
 
-In the newly created migration file, add instructions to create and tear down a `users` table:
+In the newly created migration file, add instructions to create and tear down the `users` table:
 
 {{< gist "golang/000-create-users.sql" "sql" "db/migrations/20240913000048_create_users.sql" >}}
 
@@ -288,13 +288,74 @@ Define a `UserService` type in `services/user_service.go`:
 
 {{< gist "golang/026-user_service.go" "go" "services/user_service.go" >}}
 
+At this point, the `RegisterUser` method does nothing.
+However, we have a clearly defined API contract: we have defined a type for the input parameters, and know that the method should return a `(*queries.User, error)` tuple.
+This is enough to write some unit tests for the `RegisterUser` method and implement the logic later to get the test suite to pass.
+
+According to [this StackOverflow thread](https://stackoverflow.com/questions/2381910/is-it-reasonable-to-enforce-that-unit-tests-should-never-talk-to-a-live-database), what we are going to write is, by definition, an _integration test_, rather than a _unit test_, by merit of talking to an actual database.
+However, I find this distinction to be quite useless, because almost all tests that we are going to be writing for this project will be running against a real database.
+So, if you really care about correctness, please just keep in mind that everything below is actually an _integration test_.
+
+### Preparing a test database
+
+In order to run our integration tests against a dedicated database, we need to prepare the database in roughly the following steps:
+
+1. **Create** a test database.
+2. Run all schema **migrations** against the newly created database.
+3. On subsequent runs, **clean** database tables.
+
+First, let us define new environment variables in `.envrc`.
+We will be using these variables to create and connect to the test database.
+
+{{< gist "golang/027-envrc" "shell" ".envrc" "{\"linenostart\":5}" >}}
+
+Make sure to run `direnv allow` to approve these changes and to update `.envrc.sample` accordingly.
+
+In `Makefile`, define the following targets to prepare a test database and run test suites:
+
+{{< gist "golang/028-Makefile" "makefile" "Makefile" "{\"linenostart\":8}" >}}
+
+This file utilizes GNU `make` syntax extensions to define a dynamic `guard-%` target, which ensures that each required environment variable is set and non-empty.
+If you are developing on a system that defaults to BSD `make` (such as FreeBSD), you may need to run all `make` commands as `gmake`.
+
+The `db.test.prepare` uses this dynamic target to validate that both `TEST_DATABASE_NAME` and `TEST_DATABASE_URL` are non-empty before creating a tast database and running schema migrations against it using `goose`. If the database already exists, we ignore all errors and proceed with the schema migrations.
+
+Finally, the `test` target runs the test suites of all packages in the project. Since the `test` target lists `db.test.prepare` as a dependency, `make` will ensure that all the migrations are correctly applied against the test database before the test suites are executed.
+
+With these changes, you should be able to execute both targets and end up with a properly migrated test database, and the testing engine should inform you that it did not manage to find any test files in the project:
+
+```shell
+$ make db.test.prepare
+2024/09/16 01:00:28 OK   20240913000048_create_users.sql (13.56ms)
+2024/09/16 01:00:28 goose: successfully migrated database to version: 20240913000048
+
+$ make test
+2024/09/16 01:00:31 goose: no migrations to run. current version: 20240913000048
+go test -v ./...
+?       github.com/moroz/webauthn-academy-go    [no test files]
+?       github.com/moroz/webauthn-academy-go/db/queries [no test files]
+?       github.com/moroz/webauthn-academy-go/services   [no test files]
+```
+
+### Setting up a test suite
+
+Even though Go comes with a built-in testing engine, writing tests with just the standard library tooling is very tedious and repetitive.
+Therefore we are going to install [stretchr/testify](https://pkg.go.dev/github.com/stretchr/testify).
+
+First, install `testify`:
+
+```shell
+go get github.com/stretchr/testify
+```
+
+
+
+
+Next, we can test our data validation and the registration logic using unit tests.
+
 -- Unrevised content below -- 
 
 ### Build a database interface for the `users` table
-
-In `types/user.go`, define types representing records in the `users` table and new user registration params:
-
-{{< file "golang/001-users.go" "go" >}}
 
 On the `NewUserParams` struct type, we define annotations for [gorilla/schema](https://github.com/gorilla/schema) and [gookit/validate](https://github.com/gookit/validate). Later on, we will be using `gorilla/schema` to convert HTTP POST data to structs. `gookit/validate` is a simple validation library.
 
@@ -302,40 +363,8 @@ For reasons I cannot fathom, the Golang ecosystem has settled on the [go-playgro
 I have found this library to be good for validation, but a pain in the neck whenever I had to customize error messages.
 `gookit/validate` is much simpler, and customizing error messages is much simpler as well.
 
-In `store/user_store.go`, define a `userStore` struct. We will be using this type to implement basic CRUD (**C**reate-**R**ead-**U**pdate-**D**elete) operations. For now, let's write an `InsertUser` method to insert pre-validated records into the database. Later on, we will be building on top of this method to implement a user registration workflow.
-
-{{< file "golang/002-user-store.go" "go" >}}
-
-In `service/user_service.go`, define a `UserService` type. We will be using this type to implement higher-level database interactions.
-While the `InsertUser` function in the previous example was a simple `INSERT` operation, the `RegisterUser` method on the `UserService` struct also handles data validation using `gookit/validate` and password hashing using [alexedwards/argon2id](https://github.com/alexedwards/argon2id).
-
-{{< file "golang/003-user-service.go" "go" >}}
-
 ### Prepare a test suite
 
-Next, we can test our data validation and the registration logic using unit tests.
-Go comes with a built-in testing engine, but writing tests with just the standard library tooling is very tedious and repetitive.
-Therefore we are going to install [stretchr/testify](https://pkg.go.dev/github.com/stretchr/testify).
-
-Then, in `.envrc`, define two new environment variables: `TEST_DATABASE_NAME` and `TEST_DATABASE_URL`.
-We will be using these variables to create and connect to the test database.
-Then, define Makefile targets to prepare the test database and run the test suites:
-
-```makefile
-guard-%:
-	@ test -n "${$*}" || (echo "FATAL: Environment variable $* is not set!"; exit 1)
-
-db.test.prepare: guard-TEST_DATABASE_NAME guard-TEST_DATABASE_URL
-	@ createdb ${TEST_DATABASE_NAME} 2>/dev/null || true
-	@ env GOOSE_DBSTRING="${TEST_DATABASE_URL}" goose up
-
-test: db.test.prepare
-	go test -v ./...
-```
-
-This file utilizes GNU `make` syntax extensions to define a dynamic `guard-%` target, which ensures that each required environment variable is set and non-empty.
-We then use these guards to validate the environment before running the `db.test.prepare` target, which creates a test database and runs migrations against this database.
-Finally, the `test` target runs the test suites of all packages in the project. Since the `test` target lists `db.test.prepare` as a dependency, `make` will ensure that all the migrations are correctly applied against the test database before the test suites are executed.
 
 In `service/service_test.go`, define a test suite using `stretchr/testify`. This file does not define any specific tests, only a scaffolding for the tests we are going to add in other files.
 
