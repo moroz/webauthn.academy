@@ -379,7 +379,77 @@ FAIL
 make: *** [Makefile:16: test] Error 1
 ```
 
+We can make our initial test pass with the following implementation of `RegisterUser`:
+
 {{< gist "golang/031-user_service.go" "go" "services/user_service.go" "{\"linenostart\":23}" >}}
+
+```shell
+$ make test
+2024/09/17 00:57:05 goose: no migrations to run. current version: 20240913000048
+go test -v ./...
+?       github.com/moroz/webauthn-academy-go    [no test files]
+?       github.com/moroz/webauthn-academy-go/db/queries [no test files]
+=== RUN   TestServiceTestSuite
+=== RUN   TestServiceTestSuite/TestRegisterUser
+--- PASS: TestServiceTestSuite (0.03s)
+    --- PASS: TestServiceTestSuite/TestRegisterUser (0.03s)
+PASS
+ok      github.com/moroz/webauthn-academy-go/services   0.030s
+```
+
+However, there is a problem with this implementation: we are storing passwords in plain text. The [recommended way to store passwords](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) in a database is to hash them using a dedicated password hashing algorithm. 
+In the next subsection, we are going to modify our implementation to use [Argon2id](https://en.wikipedia.org/wiki/Argon2) instead.
+
+### Hashing passwords using Argon2id
+
+Test if the hashed password matches the [PHC string format](https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md) for Argon2id:
+
+{{< gist "golang/032-user_service_test.go" "go" "services/user_service_test.go" "{\"linenostart\":9}" >}}
+
+The test successfully fails:
+
+```shell
+$ make test
+2024/09/17 01:36:39 goose: no migrations to run. current version: 20240913000048
+go test -v ./...
+?       github.com/moroz/webauthn-academy-go    [no test files]
+?       github.com/moroz/webauthn-academy-go/db/queries [no test files]
+=== RUN   TestServiceTestSuite
+=== RUN   TestServiceTestSuite/TestRegisterUser
+    user_service_test.go:23: 
+                Error Trace:    /home/karol/working/webauthn/wip/services/user_service_test.go:23
+                Error:          Expect "foobar123123" to match "^\$argon2id\$"
+                Test:           TestServiceTestSuite/TestRegisterUser
+--- FAIL: TestServiceTestSuite (0.02s)
+    --- FAIL: TestServiceTestSuite/TestRegisterUser (0.02s)
+FAIL
+FAIL    github.com/moroz/webauthn-academy-go/services   0.026s
+FAIL
+make: *** [Makefile:16: test] Error 1
+```
+
+Install `argon2id`:
+
+```shell
+$ go get github.com/alexedwards/argon2id
+go: added github.com/alexedwards/argon2id v1.0.0
+```
+
+{{< gist "golang/033-user_service.go" "go" "services/user_service.go" >}}
+
+```shell
+$ make test
+2024/09/17 01:41:04 goose: no migrations to run. current version: 20240913000048
+go test -v ./...
+?       github.com/moroz/webauthn-academy-go    [no test files]
+?       github.com/moroz/webauthn-academy-go/db/queries [no test files]
+=== RUN   TestServiceTestSuite
+=== RUN   TestServiceTestSuite/TestRegisterUser
+--- PASS: TestServiceTestSuite (0.04s)
+    --- PASS: TestServiceTestSuite/TestRegisterUser (0.04s)
+PASS
+ok      github.com/moroz/webauthn-academy-go/services   0.043s
+```
 
 -- Unrevised content below -- 
 

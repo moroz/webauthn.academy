@@ -293,6 +293,9 @@ main.content {
   font-size: 1rem;
   overflow: hidden;
 
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+
   @include dark {
     border: 1px solid #2a4555;
   }
