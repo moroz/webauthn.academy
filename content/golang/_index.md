@@ -346,12 +346,40 @@ First, install `testify`:
 
 ```shell
 go get github.com/stretchr/testify
+go get github.com/stretchr/testify/suite
 ```
 
+In `services/service_test.go`, set up a `services_test` package. In this file, we are going to define the main test suite, which will later be shared by service tests.
 
-
+{{< gist "golang/029-service_test.go" "go" "services/service_test.go" >}}
 
 Next, we can test our data validation and the registration logic using unit tests.
+
+{{< gist "golang/030-user_service_test.go" "go" "services/user_service_test.go" >}}
+
+If you run the tests now, this test example is going to fail, because we have not implemented the registration logic yet:
+
+```shell
+$ make test
+2024/09/17 00:31:16 goose: no migrations to run. current version: 20240913000048
+go test -v ./...
+?       github.com/moroz/webauthn-academy-go    [no test files]
+?       github.com/moroz/webauthn-academy-go/db/queries [no test files]
+=== RUN   TestServiceTestSuite
+=== RUN   TestServiceTestSuite/TestRegisterUser
+    user_service_test.go:20: 
+                Error Trace:    /home/karol/working/webauthn/wip/services/user_service_test.go:20
+                Error:          Expected value not to be nil.
+                Test:           TestServiceTestSuite/TestRegisterUser
+--- FAIL: TestServiceTestSuite (0.02s)
+    --- FAIL: TestServiceTestSuite/TestRegisterUser (0.02s)
+FAIL
+FAIL    github.com/moroz/webauthn-academy-go/services   0.024s
+FAIL
+make: *** [Makefile:16: test] Error 1
+```
+
+{{< gist "golang/031-user_service.go" "go" "services/user_service.go" "{\"linenostart\":23}" >}}
 
 -- Unrevised content below -- 
 
@@ -363,39 +391,6 @@ For reasons I cannot fathom, the Golang ecosystem has settled on the [go-playgro
 I have found this library to be good for validation, but a pain in the neck whenever I had to customize error messages.
 `gookit/validate` is much simpler, and customizing error messages is much simpler as well.
 
-### Prepare a test suite
-
-
-In `service/service_test.go`, define a test suite using `stretchr/testify`. This file does not define any specific tests, only a scaffolding for the tests we are going to add in other files.
-
-{{< file "golang/004-service-test.go" "go" >}}
-
-With this file in place, we can set up more specific tests for registration logic. In `service/user_service_test.go`, add tests for the user service:
-
-{{< file "golang/005-user-service-test.go" "go" >}}
-
-If you run the tests now, they should all pass:
-
-```plain
-$ make test
-2024/05/16 00:01:45 goose: no migrations to run. current version: 20240511103916
-go test -v ./...
-?   	github.com/moroz/webauthn-academy-go	[no test files]
-?   	github.com/moroz/webauthn-academy-go/handler	[no test files]
-?   	github.com/moroz/webauthn-academy-go/store	[no test files]
-?   	github.com/moroz/webauthn-academy-go/types	[no test files]
-=== RUN   TestServiceTestSuite
-=== RUN   TestServiceTestSuite/TestRegisterUser
-=== RUN   TestServiceTestSuite/TestRegisterUserWithDuplicateEmail
-=== RUN   TestServiceTestSuite/TestRegisterUserWithInvalidParams
---- PASS: TestServiceTestSuite (0.20s)
-    --- PASS: TestServiceTestSuite/TestRegisterUser (0.10s)
-    --- PASS: TestServiceTestSuite/TestRegisterUserWithDuplicateEmail (0.06s)
-    --- PASS: TestServiceTestSuite/TestRegisterUserWithInvalidParams (0.03s)
-PASS
-ok  	github.com/moroz/webauthn-academy-go/service	(cached)
-```
-
 ## Create a configuration package
 
 In `config/config.go`, add a module to encapsulate the logic for reading and validating application configuration from environment variables.
@@ -403,9 +398,6 @@ In `config/config.go`, add a module to encapsulate the logic for reading and val
 {{< file "golang/005-config-helper.go" "go" >}}
 
 The helper function `MustGetenv` wraps [`os.Getenv`](https://pkg.go.dev/os#Getenv) so that if any required environment variable is unset or empty, the function will log an error message and terminate the program. Failing early helps identify configuration errors early on, and putting configuration in a single, independent package allows us to import this package anywhere in the program, without having to worry about circular dependency errors.
-
-For now, we only 
-
 
 ### Set up `templ` for HTML templating
 

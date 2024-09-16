@@ -214,13 +214,18 @@ Prism.hooks.add("after-highlight", (env) => {
       parsed = JSON.parse(meta);
     } catch { }
   }
-  const { linenostart = 1 } = parsed;
+  const { linenostart = 1, highlighted = [] } = parsed;
 
   env.element.innerHTML = env.element.innerHTML
     .trimEnd()
     .split("\n")
-    .map((line) => `<span class="line">${line}</span>`)
+    .map((line, index) => {
+      const lineno = linenostart + index - 1;
+      const hl = highlighted.includes(lineno);
+      const className = hl ? "line hl" : "line";
+      return `<span class="${className}">${line}</span>`;
+    })
     .join("\n");
 
-  parent.style = `counter-reset: lineNumber ${linenostart - 1}`;
+  parent.setAttribute("style", `counter-reset: lineNumber ${linenostart - 1}`);
 });
