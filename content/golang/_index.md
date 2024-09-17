@@ -475,15 +475,16 @@ ok      github.com/moroz/webauthn-academy-go/services   0.043s
 
 [`gookit/validate`](https://github.com/gookit/validate/) is a simple and customizable struct validation library. As is the case with many open source Go libraries, its documentation is written in [Chinglish](https://gookit.github.io/validate/#/) and it is easier to read if you understand [Chinese](https://gookit.github.io/validate/#/README.zh-CN).
 
+Why not [`go-playground/validator`](https://pkg.go.dev/github.com/go-playground/validator), you may ask?
+
+For reasons I cannot fathom, the Golang ecosystem has settled on `go-playground/validator` as the state of the art for struct validation.
+I admit, this library has a considerable set of built-in validators, but even at version 10, its documentation and codebase is dreadful, full of cryptic logic, [tight coupling](https://github.com/go-playground/validator/blob/master/_examples/translations/main.go) to equally poorly documented libraries, and single-letter variable names.
+
+`gookit/validate` is much simpler, and I do _not_ need to use a mysterious ["universal translator"](github.com/go-playground/universal-translator) library just to display a custom error message.
+
 On the `NewUserParams` struct type, define annotations for [gookit/validate](https://github.com/gookit/validate).
 
 -- Unrevised content below -- 
-
-### Build a database interface for the `users` table
-
-For reasons I cannot fathom, the Golang ecosystem has settled on the [go-playground/validator](https://pkg.go.dev/github.com/go-playground/validator) library as the state of the art in terms of struct validation.
-I have found this library to be good for validation, but a pain in the neck whenever I had to customize error messages.
-`gookit/validate` is much simpler, and customizing error messages is much simpler as well.
 
 ## Create a configuration package
 
