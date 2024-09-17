@@ -15,7 +15,8 @@ document.querySelectorAll(".gist pre").forEach((pre) => {
     let lines = (pre as HTMLPreElement).dataset.code?.split("\n") as string[];
     if (!lines) return;
 
-    const isShell = pre.querySelector("code.language-shell") !== null;
+    const isShell =
+      pre.querySelector("code.language-shell, code.language-plain") !== null;
     const hasDollar = lines.some((line) => line?.startsWith("$"));
 
     if (isShell && hasDollar) {

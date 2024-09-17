@@ -539,7 +539,29 @@ error(github.com/gookit/validate.Errors) [
 (dlv) 
 ```
 
-The error message is technically correct, but the wording is strange. Let's override the error messages:
+The error message is technically correct, but the wording is strange. Let's update the tests to ensure that the error message is equal to `"can't be blank"`:
+
+{{< gist "golang/037-user_service_test.go" "go" "services/user_service_test.go" `{"linenostart":27}` >}}
+
+
+
+```plain
+$ make test                                                                                                                          
+2024/09/17 18:57:05 goose: no migrations to run. current version: 20240913000048                                                                              
+go test -v ./...                                                                                                                                              
+?       github.com/moroz/webauthn-academy-go    [no test files]                                                                                               
+?       github.com/moroz/webauthn-academy-go/db/queries [no test files]                                                                                       
+=== RUN   TestServiceTestSuite                                                                                                                                
+=== RUN   TestServiceTestSuite/TestRegisterUser                                                                                                               
+=== RUN   TestServiceTestSuite/TestRegisterUserWithMissingAttributes                                                                                          
+    user_service_test.go:42:                                                                                                                                  
+                Error Trace:    /home/karol/working/webauthn/wip/services/user_service_test.go:42                                                             
+                Error:          Not equal: 
+                                expected: "can't be blank"
+                                actual  : "Email is required to not be empty"
+
+# ... many similar errors below ...
+```
 
 {{< gist "golang/036-user_service.go" "go" "services/user_service.go" `{"linenostart":19}` >}}
 

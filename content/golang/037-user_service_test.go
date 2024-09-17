@@ -11,6 +11,8 @@ func (s *ServiceTestSuite) TestRegisterUserWithMissingAttributes() {
 		user, err := srv.RegisterUser(context.Background(), params)
 		s.Nil(user)
 		s.IsType(validate.Errors{}, err)
+
+		actual := err.(validate.Errors).OneError().Error()
+		s.Equal("can't be blank", actual)
 	}
 }
-
