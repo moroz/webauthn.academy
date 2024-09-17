@@ -23,6 +23,8 @@ $container-size: 800px;
   }
 }
 
+$font-sans: "Open Sans", system-ui, sans-serif;
+
 $font-monospace: Consolas,
   SFMono-Regular,
   SF Mono,
@@ -77,7 +79,7 @@ body {
 
 body {
   color: var(--base-fg);
-  font-family: "Open Sans", sans-serif;
+  font-family: $font-sans;
   line-height: 1.5;
   min-height: 100vh;
   display: flex;
