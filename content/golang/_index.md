@@ -541,7 +541,7 @@ error(github.com/gookit/validate.Errors) [
 
 The error message is technically correct, but the wording is strange. Let's override the error messages:
 
-{{< gist "golang/036-user_service.go" "go" "services/user_service.go" `{"linenostart":26}` >}}
+{{< gist "golang/036-user_service.go" "go" "services/user_service.go" `{"linenostart":19}` >}}
 
 Again, we can verify the changes in the debugger:
 
