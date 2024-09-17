@@ -54,5 +54,5 @@ name = 'Contact and licensing'
 pageRef = '/contact'
 weight = 40
 
-# [markup.goldmark.renderer]
-# unsafe= true
+[markup.goldmark.renderer]
+unsafe= true

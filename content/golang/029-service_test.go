@@ -28,4 +28,3 @@ func (s *ServiceTestSuite) SetupTest() {
 	_, err = s.db.Exec(context.Background(), "truncate users")
 	s.NoError(err)
 }
-

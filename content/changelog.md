@@ -2,6 +2,15 @@
 title: Changelog
 ---
 
+## 2024-09-17
+
+* Go: Improved explanations for initial user registration tests.
+* Go: Introduction to input validation.
+
+## 2024-09-16
+
+* Go: Added more content for user service and testing.
+
 ## 2024-09-14
 
 * Updated color schemes.

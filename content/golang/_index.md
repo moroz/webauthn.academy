@@ -307,13 +307,13 @@ In order to run our integration tests against a dedicated database, we need to p
 First, let us define new environment variables in `.envrc`.
 We will be using these variables to create and connect to the test database.
 
-{{< gist "golang/027-envrc" "shell" ".envrc" "{\"linenostart\":5}" >}}
+{{< gist "golang/027-envrc" "shell" ".envrc" `{"linenostart":5}` >}}
 
 Make sure to run `direnv allow` to approve these changes and to update `.envrc.sample` accordingly.
 
 In `Makefile`, define the following targets to prepare a test database and run test suites:
 
-{{< gist "golang/028-Makefile" "makefile" "Makefile" "{\"linenostart\":8}" >}}
+{{< gist "golang/028-Makefile" "makefile" "Makefile" `{"linenostart":8}` >}}
 
 This file utilizes GNU `make` syntax extensions to define a dynamic `guard-%` target, which ensures that each required environment variable is set and non-empty.
 If you are developing on a system that defaults to BSD `make` (such as FreeBSD), you may need to run all `make` commands as `gmake`.
@@ -345,17 +345,26 @@ Therefore we are going to install [stretchr/testify](https://pkg.go.dev/github.c
 First, install `testify`:
 
 ```shell
-go get github.com/stretchr/testify
-go get github.com/stretchr/testify/suite
+$ go get github.com/stretchr/testify
+$ go get github.com/stretchr/testify/suite
 ```
 
-In `services/service_test.go`, set up a `services_test` package. In this file, we are going to define the main test suite, which will later be shared by service tests.
+In `services/service_test.go`, set up a `services_test` package. In this file, we are going to define the main test suite, which will later be shared by unit tests for all service types.
 
 {{< gist "golang/029-service_test.go" "go" "services/service_test.go" >}}
 
-Next, we can test our data validation and the registration logic using unit tests.
+This file makes use of the [github.com/stretchr/testify/suite](https://pkg.go.dev/github.com/stretchr/testify/suite) package, providing convenience functions to run tests in _test suites_ (pronounced like _test sweets_).
+
+Using a test suite, our test examples can use setup and teardown callbacks.
+In this example, we define a `SetupTestSuite()` method on the `ServiceTestSuite` type, and within that method, we connect to the database and clean the `users` table to ensure that we are starting with an empty database. The calls to `s.NoError(err)` use _test assertions_, which are convenience methods defined in the [github.com/stretchr/testify/assert](https://pkg.go.dev/github.com/stretchr/testify@v1.9.0/assert#Assertions) package. For instance, when calling the method [`NoError`](https://pkg.go.dev/github.com/stretchr/testify@v1.9.0/assert#Assertions.NoError) with an error value, we assert that no error was returned from a function. If an error is indeed returned, the test will fail, hopefully with a descriptive error message.
+
+Note that we also need to define a regular Go test example, here named `TestServiceTestSuite`, serving as an entry point for the Go test runner.
+
+Next, we can test our data validation and registration logic in a new file:
 
 {{< gist "golang/030-user_service_test.go" "go" "services/user_service_test.go" >}}
+
+### Making the tests pass
 
 If you run the tests now, this test example is going to fail, because we have not implemented the registration logic yet:
 
@@ -381,7 +390,9 @@ make: *** [Makefile:16: test] Error 1
 
 We can make our initial test pass with the following implementation of `RegisterUser`:
 
-{{< gist "golang/031-user_service.go" "go" "services/user_service.go" "{\"linenostart\":23}" >}}
+{{< gist "golang/031-user_service.go" "go" "services/user_service.go" `{"linenostart":23}` >}}
+
+This implementation satisfies our initial test conditions:
 
 ```shell
 $ make test
@@ -402,11 +413,16 @@ In the next subsection, we are going to modify our implementation to use [Argon2
 
 ### Hashing passwords using Argon2id
 
-Test if the hashed password matches the [PHC string format](https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md) for Argon2id:
+Before implementing password hashing, let us first add a test example.
+Using the [`Regexp`](https://pkg.go.dev/github.com/stretchr/testify@v1.9.0/assert#Assertions.Regexp) matcher and a [regular expression](https://en.wikipedia.org/wiki/Regular_expression), we test if the `PasswordHash` field on the returned `queries.User` struct matches the [PHC string format](https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md) for Argon2id:
 
-{{< gist "golang/032-user_service_test.go" "go" "services/user_service_test.go" "{\"linenostart\":9}" >}}
+{{< gist "golang/032-user_service_test.go" "go" "services/user_service_test.go" `{"linenostart":9}` >}}
 
-The test successfully fails:
+This regular expression will only match if the string _starts with_ the substring `$argon2id$`.
+We need to escape dollar signs as `\$` so that they are interpreted as literal dollar signs and not as "end of string."
+Do note that we are passing the source for this regular expression as a raw string, surrounded with backticks (<code>&#96;</code>) rather than double quotes (<code>&#34;</code>). This way we do not need to escape backslashes (we can write <code>&#92;</code> instead of <code>&#92;&#92;</code>).
+
+This test successfully fails:
 
 ```shell
 $ make test
@@ -428,14 +444,18 @@ FAIL
 make: *** [Makefile:16: test] Error 1
 ```
 
-Install `argon2id`:
+The first step to make it pass is to install `argon2id`:
 
 ```shell
 $ go get github.com/alexedwards/argon2id
 go: added github.com/alexedwards/argon2id v1.0.0
 ```
 
-{{< gist "golang/033-user_service.go" "go" "services/user_service.go" >}}
+Then, in `RegisterUser`, hash the password before inserting it into the database:
+
+{{< gist "golang/033-user_service.go" "go" "services/user_service.go" `{"linenostart":25}` >}}
+
+The test should now be passing:
 
 ```shell
 $ make test
@@ -451,11 +471,15 @@ PASS
 ok      github.com/moroz/webauthn-academy-go/services   0.043s
 ```
 
+### Validating inputs using `gookit/validate`
+
+[`gookit/validate`](https://github.com/gookit/validate/) is a simple and customizable struct validation library. As is the case with many open source Go libraries, its documentation is written in [Chinglish](https://gookit.github.io/validate/#/) and it is easier to read if you understand [Chinese](https://gookit.github.io/validate/#/README.zh-CN).
+
+On the `NewUserParams` struct type, define annotations for [gookit/validate](https://github.com/gookit/validate).
+
 -- Unrevised content below -- 
 
 ### Build a database interface for the `users` table
-
-On the `NewUserParams` struct type, we define annotations for [gorilla/schema](https://github.com/gorilla/schema) and [gookit/validate](https://github.com/gookit/validate). Later on, we will be using `gorilla/schema` to convert HTTP POST data to structs. `gookit/validate` is a simple validation library.
 
 For reasons I cannot fathom, the Golang ecosystem has settled on the [go-playground/validator](https://pkg.go.dev/github.com/go-playground/validator) library as the state of the art in terms of struct validation.
 I have found this library to be good for validation, but a pain in the neck whenever I had to customize error messages.
