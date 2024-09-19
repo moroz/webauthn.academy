@@ -495,7 +495,7 @@ Let's build a failing test to ensure that user registration fails if any of the 
 
 On the `NewUserParams` struct type, define annotations for [gookit/validate](https://github.com/gookit/validate):
 
-{{< gist "golang/035-user_service.go" "go" "services/user_service.go" `{"linenostart":19}` >}}
+{{< gist "golang/035-user_service.go" "go" "services/user_service.go" `{"linenostart":16}` >}}
 
 With these changes, our tests for `required` validations should again be passing:
 
@@ -587,5 +587,136 @@ error(github.com/gookit/validate.Errors) [
         ], 
 ]
 (dlv) 
+```
 
+Analogously, we can add more tests for the remaining validations. The following listing shows the test file in its entirety, which I am not going to explain in detail:
+
+{{< gist "golang/038-user_service_test.go" "go" "services/user_service_test.go" >}}
+
+### Email address should be unique
+
+At the moment, if you try to register a user with a non-unique email address, the action will fail on database level, because there is a unique constraint on the `email` column.
+This is enough to ensure that the data stored in the database is correct, but it's not exactly the best user experience.
+Ideally, we would like to get validation errors just like for all the other validations.
+One possible way to do this would be to query the database every time when we want to `insert` or `update` a row, like this:
+
+```sql
+select exists (select 1 from users where email = 'user@example.com');
+-- if it returns `true`, abandon the operation
+```
+
+This is the approach used by [validates_uniqueness_of](https://apidock.com/rails/ActiveRecord/Validations/ClassMethods/validates_uniqueness_of) in ActiveRecord, which is the default ORM in Ruby on Rails.
+It is arguably the simplest way to solve it, but on its own, it does not guarantee data correctness---you always need to use it together with a database constraint.
+
+Another way is to create a unique constraint in the database, and if a constraint validation prevents a record from being inserted, we convert the raw error struct returned by the database into a pretty validation message:
+
+```sql
+insert into users (email) values ('user@example.com');
+-- Okeyday! Value correctly inserted!
+
+insert into users (email) values ('user@example.com');
+-- OOPSIE! Return a validation error!
+```
+
+This is the approach I am going to use in this tutorial, and it is inspired by [Ecto for Elixir](https://hexdocs.pm/ecto/Ecto.Changeset.html#unique_constraint/3).
+
+### Database-side uniqueness validation
+
+Start by writing tests for the way we want the application to work. First, create a user and ensure the first one can be correctly saved. Then, try to register the same user with different casing: unmodified, all-caps, and with the first letter of each word capitalized. Since the `email` column is stored as `citext` (case-insensitive text), a unique constraint should handle each of these cases correctly, rejecting each of the three records with exactly the same error.
+
+{{< gist "golang/039-user_service_test.go" "go" "services/user_service_test.go" `{"linenostart":111}` >}}
+
+If you run the tests now, the example panics due to an incorrect type cast: the error value returned from `RegisterUser` is still a raw `*pgconn.PgError` struct rather than a validation error:
+
+```plain
+$ make test                                                                                                                                                                                 
+2024/09/20 01:14:22 goose: no migrations to run. current version: 20240913000048
+go test -v ./...
+?       github.com/moroz/webauthn-academy-go    [no test files]
+?       github.com/moroz/webauthn-academy-go/db/queries [no test files]
+=== RUN   TestServiceTestSuite
+=== RUN   TestServiceTestSuite/TestRegisterUser
+=== RUN   TestServiceTestSuite/TestRegisterUserWithDuplicateEmail
+    user_service_test.go:128: 
+                Error Trace:    /home/karol/working/webauthn/wip/services/user_service_test.go:128
+                Error:          Expected nil, but got: &queries.User{ID:0, Email:"", DisplayName:"", PasswordHash:"", InsertedAt:pgtype.Timestamp{Time:time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), InfinityModifier:0, Valid:false}, UpdatedAt:pgtype.Timestamp{Time:time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), InfinityModifier:0, Valid:false}}
+                Test:           TestServiceTestSuite/TestRegisterUserWithDuplicateEmail
+    user_service_test.go:129: 
+                Error Trace:    /home/karol/working/webauthn/wip/services/user_service_test.go:129
+                Error:          Object expected to be of type validate.Errors, but was *pgconn.PgError
+                Test:           TestServiceTestSuite/TestRegisterUserWithDuplicateEmail
+    iface.go:275: test panicked: interface conversion: error is *pgconn.PgError, not validate.Errors
+        goroutine 102 [running]:
+// ... stacktrace omitted for brevity ...
+```
+
+We can check the exact error value in a debugger:
+
+```shell
+Type 'help' for list of commands.
+Breakpoint 1 set at 0xd3edda for github.com/moroz/webauthn-academy-go/services_test.(*ServiceTestSuite).TestRegisterUserWithDuplicateEmail() ./user_service_test.go:128
+> [Breakpoint 1] github.com/moroz/webauthn-academy-go/services_test.(*ServiceTestSuite).TestRegisterUserWithDuplicateEmail() ./user_service_test.go:128 (hits goroutine(146):1 total:1) (PC: 0xd3edda)
+   123:         emails := []string{params.Email, strings.ToUpper(params.Email), "Uniqueness@Example.Com"}
+   124:
+   125:         for _, email := range emails {
+   126:                 params.Email = email
+   127:                 user, err := srv.RegisterUser(context.Background(), params)
+=> 128:                 s.Nil(user)
+   129:                 s.IsType(validate.Errors{}, err)
+   130:
+   131:                 actual := err.(validate.Errors).Field("Email")
+   132:                 s.Equal(map[string]string{"unique": "has already been taken"}, actual)
+   133:         }
+(dlv) p err
+error(*github.com/jackc/pgx/v5/pgconn.PgError) *{
+        Severity: "ERROR",
+        SeverityUnlocalized: "ERROR",
+        Code: "23505",
+        Message: "duplicate key value violates unique constraint \"users_email_key\"",
+        Detail: "Key (email)=(uniqueness@example.com) already exists.",
+        Hint: "",
+        Position: 0,
+        InternalPosition: 0,
+        InternalQuery: "",
+        Where: "",
+        SchemaName: "public",
+        TableName: "users",
+        ColumnName: "",
+        DataTypeName: "",
+        ConstraintName: "users_email_key",
+        File: "nbtinsert.c",
+        Line: 666,
+        Routine: "_bt_check_unique",}
+```
+
+According to [Appendix A. PostgreSQL Error Codes](https://www.postgresql.org/docs/current/errcodes-appendix.html) in the PostgreSQL documentation (which I highly recommend you read in your spare time), the error code `23505` stands for `unique_violation`, and indicates that a row we are trying to insert violates a unique constraint. The error struct also contains the name of the validated constraint, which in this case is the name generated automatically by Postgres---`users_email_key`. With this knowledge, we can update the `RegisterUser` method accordingly:
+
+{{< gist "golang/040-user_service.go" "go" "services/user_service.go" `{"linenostart":36}` >}}
+
+With these modifications, all validation tests should be passing:
+
+```shell
+$ make test
+2024/09/20 01:43:50 goose: no migrations to run. current version: 20240913000048
+go test -v ./...
+?       github.com/moroz/webauthn-academy-go    [no test files]
+?       github.com/moroz/webauthn-academy-go/db/queries [no test files]
+=== RUN   TestServiceTestSuite
+=== RUN   TestServiceTestSuite/TestRegisterUser
+=== RUN   TestServiceTestSuite/TestRegisterUserWithDuplicateEmail
+=== RUN   TestServiceTestSuite/TestRegisterUserWithInvalidEmail
+=== RUN   TestServiceTestSuite/TestRegisterUserWithInvalidPasswordConfirmation
+=== RUN   TestServiceTestSuite/TestRegisterUserWithMissingAttributes
+=== RUN   TestServiceTestSuite/TestRegisterUserWithShortPassword
+=== RUN   TestServiceTestSuite/TestRegisterUserWithTooLongPassword
+--- PASS: TestServiceTestSuite (0.15s)
+    --- PASS: TestServiceTestSuite/TestRegisterUser (0.04s)
+    --- PASS: TestServiceTestSuite/TestRegisterUserWithDuplicateEmail (0.06s)
+    --- PASS: TestServiceTestSuite/TestRegisterUserWithInvalidEmail (0.01s)
+    --- PASS: TestServiceTestSuite/TestRegisterUserWithInvalidPasswordConfirmation (0.01s)
+    --- PASS: TestServiceTestSuite/TestRegisterUserWithMissingAttributes (0.01s)
+    --- PASS: TestServiceTestSuite/TestRegisterUserWithShortPassword (0.01s)
+    --- PASS: TestServiceTestSuite/TestRegisterUserWithTooLongPassword (0.01s)
+PASS
+ok      github.com/moroz/webauthn-academy-go/services   0.161s
 ```

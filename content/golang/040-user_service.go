@@ -1,13 +1,3 @@
-// import "github.com/gookit/validate"
-// ...
-
-type RegisterUserParams struct {
-	Email                string `validate:"required|email"`
-	DisplayName          string `validate:"required"`
-	Password             string `validate:"required|min_len:8|max_len:64"`
-	PasswordConfirmation string `validate:"eq_field:Password"`
-}
-
 func (us *UserService) RegisterUser(ctx context.Context, params RegisterUserParams) (*queries.User, error) {
 	if v := validate.Struct(&params); !v.Validate() {
 		return nil, v.Errors
@@ -23,6 +13,11 @@ func (us *UserService) RegisterUser(ctx context.Context, params RegisterUserPara
 		DisplayName:  params.DisplayName,
 		PasswordHash: hash,
 	})
+
+	// intercept "unique_violation" errors on the email column
+	if err, ok := err.(*pgconn.PgError); ok && err.Code == "23505" && err.ConstraintName == "users_email_key" {
+		return nil, validate.Errors{"Email": {"unique": "has already been taken"}}
+	}
 
 	return user, err
 }
