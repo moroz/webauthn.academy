@@ -1,6 +1,11 @@
 {{ define "main" }}
-  <h2 id="section-title">{{ .Title }}</h2>
+  <aside class="toc">
+    <h3>Table of contents</h3>
+    {{ .TableOfContents }}
+    <a href="#" class="hide-on-mobile">Go to top</a>
+  </aside>
   <main class="content">
+    <h2 id="section-title">{{ .Title }}</h2>
     {{ .Content }}
   </main>
   {{ partial "terms.html" (dict "taxonomy" "tags" "page" .) }}

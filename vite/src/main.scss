@@ -5,6 +5,12 @@
 
 $container-size: 800px;
 
+@mixin large {
+  @media screen and (min-width: #{$container-size}) {
+    @content;
+  }
+}
+
 @mixin dark {
   @media (prefers-color-scheme: dark) {
     @content;
@@ -105,15 +111,22 @@ header {
   a:visited {
     color: var(--link-color);
   }
+}
 
-  nav {
-    ul {
-      font-size: 1.125em;
-      margin-top: 0;
-      display: flex;
-      flex-wrap: wrap;
-      column-gap: 1.5rem;
-    }
+header nav,
+footer nav {
+  ul {
+    font-size: 1.125em;
+    margin-top: 0;
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1.5rem;
+    padding: 0;
+  }
+
+  li {
+    display: flex;
+    padding: 0.125em 0;
   }
 }
 
@@ -129,17 +142,11 @@ footer {
 
   nav {
     text-align: left;
-  }
-}
 
-nav {
-  ul {
-    padding: 0;
-  }
-
-  li {
-    display: flex;
-    padding: 0.125em 0;
+    ul {
+      flex-direction: column;
+      margin-top: 1rem;
+    }
   }
 }
 
@@ -267,6 +274,7 @@ pre code {
 
 main.content {
   font-size: 1.125em;
+  width: 100%;
 
   @include mobile {
     font-size: 1.0625rem;
@@ -390,5 +398,73 @@ main.content {
         text-align: right;
       }
     }
+  }
+}
+
+aside.toc {
+  ul {
+    list-style: none;
+    padding-left: 0;
+
+    ul {
+      padding-left: 1em;
+      margin-bottom: 0.5em;
+    }
+  }
+
+  a:visited {
+    color: var(--link-color);
+  }
+}
+
+@include large {
+  main.container {
+    position: relative;
+    display: grid;
+    grid-template-columns: 250px $container-size 250px;
+    width: 100%;
+    padding-inline: 1.25rem;
+    margin-inline: auto;
+    gap: 1.25rem;
+    justify-content: center;
+  }
+
+  .content {
+    overflow: hidden;
+    max-width: $container-size;
+    margin-inline: auto;
+  }
+
+  aside.toc {
+    position: sticky;
+    height: 0;
+    top: 0;
+    background: white;
+    font-size: 0.875em;
+  }
+}
+
+header,
+header nav {
+  text-align: center;
+
+  ul {
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: #{500px + $container-size + 40px}) {
+  main.container {
+    grid-template-columns: 250px 1fr;
+  }
+
+  .content {
+    max-width: unset;
+  }
+}
+
+@include mobile {
+  .hide-on-mobile {
+    display: none;
   }
 }
