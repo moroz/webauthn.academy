@@ -2,6 +2,12 @@
 title: Changelog
 ---
 
+## 2024-09-21
+
+* Fixed bottom stickiness of the table of contents.
+* Added margin to section headings.
+* Redesigned footer colors.
+
 ## 2024-09-20
 
 * Added table of contents.

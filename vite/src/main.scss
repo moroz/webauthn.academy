@@ -47,6 +47,8 @@ $font-monospace: Consolas,
   color-scheme: light dark;
   --base-fg: #222;
   --base-bg: #fff;
+  --background-secondary: #f9f9fb;
+  --text-secondary: #4e4e4e;
   --link-color: #{darken($tw-cyan-600, 5%)};
   --link-visited-color: #{darken($tw-violet-500, 5%)};
   --code-fg: #{$tw-slate-800};
@@ -62,6 +64,8 @@ $font-monospace: Consolas,
   :root {
     --base-bg: #{$tw-slate-900};
     --base-fg: rgba(255, 255, 255, 0.87);
+    --background-secondary: #{darken($tw-slate-900, 3%)};
+    --text-secondary: rgba(255, 255, 255, 0.8);
     --link-color: #{$tw-cyan-300};
     --link-visited-color: #{$tw-violet-400};
     --code-fg: #{$tw-slate-200};
@@ -118,6 +122,7 @@ footer nav {
   ul {
     font-size: 1.125em;
     margin-top: 0;
+    padding-bottom: 2rem;
     display: flex;
     flex-wrap: wrap;
     column-gap: 1.5rem;
@@ -131,8 +136,10 @@ footer nav {
 }
 
 footer {
-  border-top: 1px solid var(--base-fg);
-  margin: 2.5rem auto;
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+  padding: 2.5rem;
+  margin-top: 2.5rem;
   text-align: center;
   width: 100%;
 
@@ -140,8 +147,18 @@ footer {
     margin: 0;
   }
 
+  a,
+  a:visited {
+    color: currentColor;
+    text-decoration: underline;
+  }
+
   nav {
     text-align: left;
+
+    a {
+      text-decoration: none;
+    }
 
     ul {
       flex-direction: column;
@@ -280,6 +297,13 @@ main.content {
     font-size: 1.0625rem;
   }
 
+  // Hack to get some space between section header and the top of the viewport when navigating to an anchor
+  h2,
+  h3 {
+    margin-top: -1rem;
+    padding-top: 1rem;
+  }
+
   h2 {
     font-size: 1.375em;
     margin-bottom: 0.5em;
@@ -364,13 +388,12 @@ main.content {
     position: relative;
     --line-number-color: var(--border-color);
     --line-number-opacity: 1;
+    padding-left: 4em;
 
     @include dark {
       --line-number-color: currentColor;
       --line-number-opacity: 0.7;
     }
-
-    padding-left: 4em;
 
     &::before {
       content: "";
@@ -437,25 +460,13 @@ aside.toc {
 
   aside.toc {
     position: sticky;
-    height: 0;
-    top: 0;
-    background: white;
+    top: 0.75rem;
     font-size: 0.875em;
+    max-height: 100vh;
+    overflow-y: auto;
     z-index: 1;
     bottom: 0;
     width: 250px;
-
-    &.stick-to-bottom {
-      position: absolute;
-      top: unset;
-      height: unset;
-      bottom: 0;
-      left: 1.25rem;
-    }
-
-    >div {
-      background: white;
-    }
   }
 }
 
