@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 )
@@ -9,10 +8,10 @@ import (
 func MustGetenv(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		msg := fmt.Sprintf("FATAL: Environment variable %s is not set", key)
-		log.Fatal(msg)
+		log.Fatalf("FATAL: Environment variable %s is not set!", key)
 	}
 	return value
 }
 
-var DatabaseURL = MustGetenv("DATABASE_URL")
+var DATABASE_URL = MustGetenv("DATABASE_URL")
+

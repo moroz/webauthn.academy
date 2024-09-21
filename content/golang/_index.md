@@ -720,3 +720,27 @@ go test -v ./...
 PASS
 ok      github.com/moroz/webauthn-academy-go/services   0.161s
 ```
+
+## Build a registration page
+
+In this section, we are going to build a HTTP handler that will display a HTML page with a registration form. Later on, we are going to use this form to register users for the app.
+
+### Create a `UserRegistrationController`
+
+{{< gist "golang/042-user_registration_controller.go" "go" "handlers/user_registration_controller.go" >}}
+
+### Move the router to package `handlers`
+
+{{< gist "golang/041-router.go" "go" "handlers/router.go" >}}
+
+### Create a configuration package
+
+In `config/config.go`, add a module to encapsulate the logic for reading and validating application configuration from environment variables.
+
+{{< gist "golang/005-config-helper.go" "go" "config/config.go" >}}
+
+The helper function `MustGetenv` wraps [`os.Getenv`](https://pkg.go.dev/os#Getenv) so that if any required environment variable is unset or empty, the function will log an error message and terminate the program. Failing early helps identify configuration errors early on. Since this helper has its own package, we can import it anywhere in the program, without having to worry about circular dependency errors.
+
+### Instantiate the router in `main()`
+
+{{< gist "golang/043-main.go" "go" "main.go" >}}

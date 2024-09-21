@@ -2,6 +2,14 @@
 title: Changelog
 ---
 
+## 2024-09-20
+
+* Added table of contents.
+
+## 2024-09-19
+
+* Go: Added testing and unique constraint error messages.
+
 ## 2024-09-17
 
 * Go: Improved explanations for initial user registration tests.

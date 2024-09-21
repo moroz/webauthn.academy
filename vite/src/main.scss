@@ -422,17 +422,17 @@ aside.toc {
     position: relative;
     display: grid;
     grid-template-columns: 250px $container-size 250px;
-    width: 100%;
+    width: calc(250px + $container-size + 250px + (2 * 1.25rem));
     padding-inline: 1.25rem;
     margin-inline: auto;
     gap: 1.25rem;
-    justify-content: center;
   }
 
   .content {
     overflow: hidden;
     max-width: $container-size;
     margin-inline: auto;
+    grid-column: 2;
   }
 
   aside.toc {
@@ -441,6 +441,21 @@ aside.toc {
     top: 0;
     background: white;
     font-size: 0.875em;
+    z-index: 1;
+    bottom: 0;
+    width: 250px;
+
+    &.stick-to-bottom {
+      position: absolute;
+      top: unset;
+      height: unset;
+      bottom: 0;
+      left: 1.25rem;
+    }
+
+    >div {
+      background: white;
+    }
   }
 }
 
