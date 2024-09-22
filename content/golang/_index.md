@@ -727,9 +727,13 @@ In this section, we are going to build a HTTP handler that will display a HTML p
 
 ### Create a `UserRegistrationController`
 
+In a new package called `handlers`, we are going to define a struct called `UserRegistrationController`, embedding a pointer to its own instance of `queries.Queries`. When we instantiate an instance of this controller, we will always pass a database connection (represented by the `queries.DBTX` interface). This pattern is called [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) and will help us test the HTTP stack against a test database further in the project. Each action of this controller will be defined as a method on the controller struct.
+
 {{< gist "golang/042-user_registration_controller.go" "go" "handlers/user_registration_controller.go" >}}
 
 ### Move the router to package `handlers`
+
+In the same package, add a function that will instantiate the application's router. Just like in the case of `UserRegistrationController`, the router requires a database connection, which we will pass to each controller we instantiate. We mount the sign up page at `GET /sign-up`.
 
 {{< gist "golang/041-router.go" "go" "handlers/router.go" >}}
 
@@ -744,3 +748,5 @@ The helper function `MustGetenv` wraps [`os.Getenv`](https://pkg.go.dev/os#Geten
 ### Instantiate the router in `main()`
 
 {{< gist "golang/043-main.go" "go" "main.go" >}}
+
+

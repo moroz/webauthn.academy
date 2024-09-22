@@ -298,7 +298,6 @@ main.content {
   }
 
   // Hack to get some space between section header and the top of the viewport when navigating to an anchor
-  h2,
   h3 {
     margin-top: -1rem;
     padding-top: 1rem;
@@ -307,6 +306,8 @@ main.content {
   h2 {
     font-size: 1.375em;
     margin-bottom: 0.5em;
+    margin-top: 1rem;
+    padding-top: 1rem;
     line-height: 1.375;
   }
 

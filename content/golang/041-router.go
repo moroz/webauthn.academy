@@ -13,7 +13,7 @@ func NewRouter(db queries.DBTX) http.Handler {
 	r.Use(middleware.Logger)
 
 	userRegistrations := UserRegistrationController(db)
-	r.Get("/", userRegistrations.New)
+	r.Get("/sign-up", userRegistrations.New)
 
 	return r
 }

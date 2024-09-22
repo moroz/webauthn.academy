@@ -2,6 +2,10 @@
 title: Changelog
 ---
 
+## 2024-09-22
+
+* Go: Added explanations for HTTP stack initialization.
+
 ## 2024-09-21
 
 * Fixed bottom stickiness of the table of contents.
